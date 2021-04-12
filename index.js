@@ -1,21 +1,98 @@
-const http = require('http');
-const fs = require('fs');
+// //const Sequelize = require('sequelize');
+// import Express from 'express';
+// import morgan from 'morgan';
+// import bodyParser from 'body-parser';
+// import path from 'path';
+// //const React = require('react');
+// import fs from 'fs';
+import router from './src/router.js'
+import config from './config.js';
 
-fs.readFile('./index.html', function(err, html) {
+// const app = Express();
 
-    if (err) {
-        throw err;
+// //SETTINGS
+// app.disable('x-powered-by');
+// app.set('env', 'development');
+
+// //MIDDLEWARE
+// app.use(morgan('tiny'));
+// app.use(Express.static('public'));
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: false }))
+//     // app.use((req, res, next) => {
+//     //     res.send('404');
+//     //     next();
+//     // })
+
+// //ROUTES
+// router(app);
+
+
+// //INITIALIZE
+// app.listen('9000', () => {
+//     console.log('Server up on port 9000');
+// })
+
+// // const sequelize = new Sequelize('pyramid', 'postgres', '7383', {
+// //     host: 'localhost',
+// //     dialect: 'postgres',
+// //     pool: {
+// //         max: 5,
+// //         min: 0,
+// //         idle: 10000
+// //     }
+// // })
+
+// // const Film = sequelize.define(
+// //     'Film', {
+// //         id: {
+// //             type: Sequelize.INTEGER,
+// //             autoIncrement: true,
+// //             field: 'id',
+// //             primaryKey: true
+// //         },
+// //         title: {
+// //             type: Sequelize.STRING,
+// //             field: 'title'
+// //         },
+// //         description: {
+// //             type: Sequelize.STRING,
+// //             field: 'description'
+// //         }
+// //     }, {
+// //         freezeTableName: true
+// //     }
+// // )
+
+// // Film.sync({ force: true }).then(() => Film.create({
+// //     title: 'Star Wars',
+// //     description: 'Una peli muy chula :p'
+// // }))
+
+import express from 'express';
+
+let _server
+
+const server = {
+    start() {
+        const app = express();
+
+        //CONFIG
+        config(app);
+
+        //ACTIONS
+        router(app);
+
+        _server = app.listen('3000', () => {
+            console.log('Server up on port 3000');
+        })
+    },
+    close() {
+        _server.close();
     }
+}
 
-    const handleServer = function(req, res) {
-        res.writeHead(200, { 'Content-Type': 'text/html' })
-        res.write(html);
-        res.end();
-    }
+export default server
 
-    const server = http.createServer(handleServer);
-
-    server.listen(3000, function() {
-        console.log('Server on port 3000')
-    });
-})
+//if (!module.parent)
+server.start();
