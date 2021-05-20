@@ -1,20 +1,25 @@
 const db = require("../models");
 const Usuarios = db.usuarios;
-const Op = db.Sequelize.Op;
-const mail = require("./email.validation");
+const validation = require("../validation/validation");
 
 // Crear
 exports.create = (req, res) => {
 
-    if (mail(req.body.email) != null) {
-        res.status(400).send(mail(req.body.email));
+    //Validar
+    const errors = validateUsuario(req.body);
+
+    if (errors != null) {
+        res.send(errors);
         return;
     }
 
     const usuario = req.body;
 
+    //BD
     Usuarios.create(usuario).then(data => {
-            res.send(data);
+            res.status(200).send({
+                message: "Usuario creado con éxito."
+            });
         })
         .catch(err => {
             res.status(500).send({
@@ -36,6 +41,16 @@ exports.findOne = (req, res) => {
 
 // Modificar
 exports.update = (req, res) => {
+
+    //Validar
+    const errors = validateUsuario(req.body);
+
+    if (errors != null) {
+        res.send(errors);
+        return;
+    }
+
+    //BD
     const id = req.params.id;
 
     Usuarios.update(req.body, {
@@ -80,4 +95,64 @@ exports.deleteOne = (req, res) => {
                 message: "Error al intentar eliminar el usuario con dirección " + id + "."
             });
         })
+}
+
+
+function validateUsuario(usuario) {
+    var empty = true;
+    var errors = {};
+    for (var key in usuario) {
+        (errors[key] == null) ? errors[key] = {}: false;
+        switch (key) {
+            case "email":
+                errors.email.empty = validation.empty(usuario[key], key);
+                errors.email.xtsn = validation.maxtsn(usuario[key], key, 50);
+                errors.email.format = validation.email(usuario[key], key);
+                break;
+            case "nombre":
+            case "apellido1":
+            case "apellido2":
+                errors[key].valid = validation.humanname(usuario[key], key);
+                errors[key].xtsn = validation.maxtsn(usuario[key], key, 35);
+                (key != "apellido2") ? errors[key].empty = validation.empty(usuario[key], key): false;
+                break;
+            case "dni":
+                errors.dni.empty = validation.empty(usuario[key], key);
+                errors.dni.valid = validation.dni(usuario[key], key);
+                break;
+            case "tipovia":
+                errors.tipovia.empty = validation.empty(usuario[key], key);
+                errors.tipovia.valid = validation.tipovia(usuario[key], key);
+                break;
+            case "nombrevia":
+                errors[key].empty = validation.empty(usuario[key], key);
+                errors[key].valid = validation.humanname(usuario[key], key);
+                break;
+            case "numvia":
+                errors[key].empty = validation.empty(usuario[key], key);
+                errors[key].valid = validation.regex(usuario[key], key, /^\w*$/);
+                break;
+            case "codigopuerta":
+                errors[key].max = validation.maxtsn(usuario[key], key, 5);
+                errors[key].min = validation.mnxtsn(usuario[key], key, 1);
+                errors[key].valid = validation.regex(usuario[key], key, /^\w*?(º|ª)?\w*?$/);
+                break;
+            case "notificaciones":
+                errors[key].valid = validation.jsobject(usuario[key], key);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    for (var key in errors) {
+        if (JSON.stringify(errors[key]) != "{}") {
+            empty = false;
+            break;
+        }
+    }
+
+    (empty) ? errors = null: false;
+    return errors;
 }
