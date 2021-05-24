@@ -6,17 +6,23 @@ module.exports = app => {
     // Retrieve all usuariogrupos
     router.get("/", usuariogrupos.findAll);
 
+    // Retrieve all usuariogrupos by grupo
+    router.get("/:codigo/:empresa", usuariogrupos.grupo);
+
+    // Retrieve all usuariogrupos by usuario
+    router.get("/:usuario", usuariogrupos.usuario);
+
     // Retrieve one usuariogrupo
-    router.get("/:id", usuariogrupos.findOne);
+    router.get("/:usuario/:codigo/:empresa", usuariogrupos.findOne);
 
     // Create one usuariogrupo
     router.post("/", usuariogrupos.create)
 
     // Update a usuariogrupo
-    router.put("/:id", usuariogrupos.update);
+    router.put("/:usuario/:codigo/:empresa", usuariogrupos.update);
 
     // Delete a usuariogrupo
-    router.delete("/:id", usuariogrupos.deleteOne);
+    router.delete("/:usuario/:codigo/:empresa", usuariogrupos.deleteOne);
 
     app.use('/api/usuariogrupos', router);
 

@@ -2,7 +2,7 @@ const rsocialsiglas = require("../models/razonsocial.enum").razonsocial;
 
 //VALIDACIÓN DE CAMPO O CADENA VACÍA
 exports.empty = (fieldValue) => {
-    if (!fieldValue || fieldValue == "") {
+    if (fieldValue === "" || fieldValue === null) {
         return `El campo no puede estar vacío.`;
     }
 }
@@ -127,10 +127,11 @@ exports.tipovia = (fieldValue) => {
 
 //NUMERO
 exports.number = (fieldValue) => {
-    if (typeof parseInt(fieldValue) != "number") {
+    if (typeof fieldValue != "number") {
         return `El campo no es válido.`
     }
 }
+
 
 //MAYOR o MENOR
 exports.compare = (fieldValue, greaterThan = true, number = 0) => {

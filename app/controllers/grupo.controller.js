@@ -111,7 +111,7 @@ exports.deleteOne = (req, res) => {
         })
 }
 
-//VAlIDATE ARCHIVO
+//VAlIDATE GRUPO
 async function validateGrupo(grupo) {
 
     var empty = true;
