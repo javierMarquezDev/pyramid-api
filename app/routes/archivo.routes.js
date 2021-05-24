@@ -9,6 +9,9 @@ module.exports = app => {
     // Retrieve one archivo
     router.get("/:id", archivos.findOne);
 
+    // Create one archivo
+    router.post("/", archivos.create)
+
     // Update a archivo
     router.put("/:id", archivos.update);
 

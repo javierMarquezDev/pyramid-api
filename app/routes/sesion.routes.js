@@ -9,6 +9,9 @@ module.exports = app => {
     // Retrieve one sesion
     router.get("/:id", sesions.findOne);
 
+    // Create one sesion
+    router.post("/", sesions.create)
+
     // Update a sesion
     router.put("/:id", sesions.update);
 

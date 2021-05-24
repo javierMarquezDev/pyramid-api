@@ -9,6 +9,9 @@ module.exports = app => {
     // Retrieve one usuariotarea
     router.get("/:id", usuariotareas.findOne);
 
+    // Create one usuariotarea
+    router.post("/", usuariotareas.create)
+
     // Update a usuariotarea
     router.put("/:id", usuariotareas.update);
 

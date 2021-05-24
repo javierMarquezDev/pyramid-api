@@ -9,6 +9,9 @@ module.exports = app => {
     // Retrieve one encuesta
     router.get("/:id", encuestas.findOne);
 
+    // Create one encuesta
+    router.post("/", encuestas.create)
+
     // Update a encuesta
     router.put("/:id", encuestas.update);
 

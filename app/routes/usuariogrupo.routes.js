@@ -9,6 +9,9 @@ module.exports = app => {
     // Retrieve one usuariogrupo
     router.get("/:id", usuariogrupos.findOne);
 
+    // Create one usuariogrupo
+    router.post("/", usuariogrupos.create)
+
     // Update a usuariogrupo
     router.put("/:id", usuariogrupos.update);
 

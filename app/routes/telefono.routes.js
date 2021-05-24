@@ -9,6 +9,9 @@ module.exports = app => {
     // Retrieve one telefono
     router.get("/:id", telefonos.findOne);
 
+    // Create one telefono
+    router.post("/", telefonos.create)
+
     // Update a telefono
     router.put("/:id", telefonos.update);
 

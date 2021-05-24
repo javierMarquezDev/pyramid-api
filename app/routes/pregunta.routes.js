@@ -9,6 +9,9 @@ module.exports = app => {
     // Retrieve one pregunta
     router.get("/:id", preguntas.findOne);
 
+    // Create one pregunta
+    router.post("/", preguntas.create)
+
     // Update a pregunta
     router.put("/:id", preguntas.update);
 

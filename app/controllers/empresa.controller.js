@@ -5,6 +5,14 @@ const Usuarios = db.usuarios;
 //Crear empresa
 exports.create = (req, res) => {
 
+    //Validar
+    const errors = validateEmpresa(req.body);
+
+    if (errors != null) {
+        res.send(errors);
+        return;
+    }
+
     const empresa = req.body;
 
     Empresas.create(empresa).then(data => {
@@ -30,6 +38,15 @@ exports.findOne = (req, res) => {
 
 // Modificar
 exports.update = (req, res) => {
+
+    //Validar
+    const errors = validateEmpresa(req.body);
+
+    if (errors != null) {
+        res.send(errors);
+        return;
+    }
+
     const id = req.params.id;
 
     Empresas.update(req.body, {
@@ -86,52 +103,44 @@ function validateEmpresa(empresa) {
         (errors[key] == null) ? errors[key] = {}: false;
         switch (key) {
             case "cif":
-                errors[key].empty = validation.empty(empresa[key], key);
-                errors[key].xtsn = validation.maxtsn(empresa[key], key, 9);
-                errors[key].format = validation.cif(empresa[key], key);
+                errors[key].empty = validation.empty(empresa[key]);
+                errors[key].xtsn = validation.maxtsn(empresa[key], 9);
+                errors[key].format = validation.cif(empresa[key]);
                 break;
             case "razonsocial":
-                errors[key].empty = validation.empty(empresa[key], key);
-                errors[key].xtsn = validation.maxtsn(empresa[key], key, 50);
-                errors[key].format = validation.razonsocial(empresa[key], key);
+                errors[key].empty = validation.empty(empresa[key]);
+                errors[key].xtsn = validation.maxtsn(empresa[key], 50);
+                errors[key].format = validation.razonsocial(empresa[key]);
                 break;
             case "nombre":
-                errors[key].valid = validation.humanname(empresa[key], key);
-                errors[key].xtsn = validation.maxtsn(empresa[key], key, 50);
+                errors[key].valid = validation.humanname(empresa[key]);
+                errors[key].xtsn = validation.maxtsn(empresa[key], 50);
                 break;
             case "administrador":
-                errors[key].format = validation.email(empresa[key], key);
+                errors[key].format = validation.email(empresa[key]);
 
                 //Validar si existe usuario
                 if (Usuarios.findByPk(empresa[key]) == null)
-                    errors[key].none = { "message": "El usuario no existe.", "field": key };
+                    errors[key].none = "El usuario no existe.";
 
-                break;
-            case "dni":
-                errors.dni.empty = validation.empty(empresa[key], key);
-                errors.dni.valid = validation.dni(empresa[key], key);
                 break;
             case "tipovia":
-                errors.tipovia.empty = validation.empty(empresa[key], key);
-                errors.tipovia.valid = validation.tipovia(empresa[key], key);
+                errors.tipovia.empty = validation.empty(empresa[key]);
+                errors.tipovia.valid = validation.tipovia(empresa[key]);
                 break;
             case "nombrevia":
-                errors[key].empty = validation.empty(empresa[key], key);
-                errors[key].valid = validation.humanname(empresa[key], key);
+                errors[key].empty = validation.empty(empresa[key]);
+                errors[key].valid = validation.humanname(empresa[key]);
                 break;
             case "numvia":
-                errors[key].empty = validation.empty(empresa[key], key);
-                errors[key].valid = validation.regex(empresa[key], key, /^\w*$/);
+                errors[key].empty = validation.empty(empresa[key]);
+                errors[key].valid = validation.regex(empresa[key], /^\w*$/);
                 break;
             case "codigopuerta":
-                errors[key].max = validation.maxtsn(empresa[key], key, 5);
-                errors[key].min = validation.mnxtsn(empresa[key], key, 1);
-                errors[key].valid = validation.regex(empresa[key], key, /^\w*?(º|ª)?\w*?$/);
+                errors[key].max = validation.maxtsn(empresa[key], 5);
+                errors[key].min = validation.mnxtsn(empresa[key], 1);
+                errors[key].valid = validation.regex(empresa[key], /^\w*?(º|ª)?\w*?$/);
                 break;
-            case "notificaciones":
-                errors[key].valid = validation.jsobject(empresa[key], key);
-                break;
-
             default:
                 break;
         }

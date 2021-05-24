@@ -6,6 +6,9 @@ module.exports = app => {
     // Retrieve one encuestausuario
     router.get("/:id", encuestausuarios.findOne);
 
+    // Create one encuestausuario
+    router.post("/", encuestausuarios.create)
+
     // Delete a encuestausuario
     router.delete("/:id", encuestausuarios.deleteOne);
 

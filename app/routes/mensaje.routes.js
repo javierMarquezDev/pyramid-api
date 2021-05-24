@@ -9,6 +9,9 @@ module.exports = app => {
     // Retrieve one mensaje
     router.get("/:id", mensajes.findOne);
 
+    // Create one mensaje
+    router.post("/", mensajes.create)
+
     // Update a mensaje
     router.put("/:id", mensajes.update);
 

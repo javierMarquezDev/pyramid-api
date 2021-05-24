@@ -9,6 +9,9 @@ module.exports = app => {
     // Retrieve one proyecto
     router.get("/:id", proyectos.findOne);
 
+    // Create one proyecto
+    router.post("/", proyectos.create)
+
     // Update a proyecto
     router.put("/:id", proyectos.update);
 

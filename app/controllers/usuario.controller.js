@@ -105,40 +105,40 @@ function validateUsuario(usuario) {
         (errors[key] == null) ? errors[key] = {}: false;
         switch (key) {
             case "email":
-                errors.email.empty = validation.empty(usuario[key], key);
-                errors.email.xtsn = validation.maxtsn(usuario[key], key, 50);
-                errors.email.format = validation.email(usuario[key], key);
+                errors.email.empty = validation.empty(usuario[key]);
+                errors.email.xtsn = validation.maxtsn(usuario[key], 50);
+                errors.email.format = validation.email(usuario[key]);
                 break;
             case "nombre":
             case "apellido1":
             case "apellido2":
-                errors[key].valid = validation.humanname(usuario[key], key);
-                errors[key].xtsn = validation.maxtsn(usuario[key], key, 35);
-                (key != "apellido2") ? errors[key].empty = validation.empty(usuario[key], key): false;
+                errors[key].valid = validation.humanname(usuario[key]);
+                errors[key].xtsn = validation.maxtsn(usuario[key], 35);
+                (key != "apellido2") ? errors[key].empty = validation.empty(usuario[key]): false;
                 break;
             case "dni":
-                errors.dni.empty = validation.empty(usuario[key], key);
-                errors.dni.valid = validation.dni(usuario[key], key);
+                errors.dni.empty = validation.empty(usuario[key]);
+                errors.dni.valid = validation.dni(usuario[key]);
                 break;
             case "tipovia":
-                errors.tipovia.empty = validation.empty(usuario[key], key);
-                errors.tipovia.valid = validation.tipovia(usuario[key], key);
+                errors.tipovia.empty = validation.empty(usuario[key]);
+                errors.tipovia.valid = validation.tipovia(usuario[key]);
                 break;
             case "nombrevia":
-                errors[key].empty = validation.empty(usuario[key], key);
-                errors[key].valid = validation.humanname(usuario[key], key);
+                errors[key].empty = validation.empty(usuario[key]);
+                errors[key].valid = validation.humanname(usuario[key]);
                 break;
             case "numvia":
-                errors[key].empty = validation.empty(usuario[key], key);
-                errors[key].valid = validation.regex(usuario[key], key, /^\w*$/);
+                errors[key].empty = validation.empty(usuario[key]);
+                errors[key].valid = validation.regex(usuario[key], /^\w*$/);
                 break;
             case "codigopuerta":
-                errors[key].max = validation.maxtsn(usuario[key], key, 5);
-                errors[key].min = validation.mnxtsn(usuario[key], key, 1);
-                errors[key].valid = validation.regex(usuario[key], key, /^\w*?(º|ª)?\w*?$/);
+                errors[key].max = validation.maxtsn(usuario[key], 5);
+                errors[key].min = validation.mnxtsn(usuario[key], 1);
+                errors[key].valid = validation.regex(usuario[key], /^\w*?(º|ª)?\w*?$/);
                 break;
             case "notificaciones":
-                errors[key].valid = validation.jsobject(usuario[key], key);
+                errors[key].valid = validation.jsobject(usuario[key]);
                 break;
 
             default:

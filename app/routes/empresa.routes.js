@@ -6,8 +6,11 @@ module.exports = app => {
     // Retrieve all empresas
     router.get("/", empresas.findAll);
 
+    // Create one empresa
+    router.post("/", empresas.create)
+
     // Retrieve one empresa
-    router.get("/:id", empresas.findOne);
+    router.get("/:id", empresas.findOne)
 
     // Update a Empresa
     router.put("/:id", empresas.update);

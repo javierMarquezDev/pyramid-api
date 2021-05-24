@@ -1,31 +1,22 @@
 //VALIDACIÓN DE CAMPO O CADENA VACÍA
-exports.empty = (fieldValue, fieldName) => {
+exports.empty = (fieldValue) => {
     if (!fieldValue || fieldValue == "") {
-        return {
-            message: `El campo no puede estar vacío.`,
-            field: fieldName
-        }
+        return `El campo no puede estar vacío.`;
     }
 }
 
 //E-MAIL
-exports.email = (fieldValue, fieldName) => {
+exports.email = (fieldValue) => {
     if (!/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(fieldValue)) {
-        return {
-            message: `${fieldName} no es un e-mail correcto.`,
-            field: fieldName
-        }
+        return `${fieldName} no es un e-mail correcto.`
     }
 }
 
 //DNI
-exports.dni = (fieldValue, fieldName) => {
+exports.dni = (fieldValue) => {
 
     if (!/^\d{8}[a-zA-Z]$/.test(fieldValue)) {
-        return {
-            message: `No es un formato de DNI correcto.`,
-            field: fieldName
-        }
+        return `No es un formato de DNI correcto.`
     }
 
     numero = parseInt(fieldValue.substr(0, fieldValue.length - 1)) % 23;
@@ -35,21 +26,15 @@ exports.dni = (fieldValue, fieldName) => {
     ref = ref.substr(numero, 1);
 
     if (ref != letra.toUpperCase()) {
-        return {
-            message: `No es un DNI correcto.`,
-            field: fieldName
-        }
+        return `No es un DNI correcto.`
     }
 }
 
 //CIF
-exports.cif = (fieldValue, fieldName) => {
+exports.cif = (fieldValue) => {
 
     if (!fieldValue || fieldValue.length !== 9) {
-        return {
-            message: `El CIF es demasiado corto.`,
-            field: fieldName
-        }
+        return `El CIF es demasiado corto.`
     }
 
     var letters = ['J', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
@@ -61,20 +46,14 @@ exports.cif = (fieldValue, fieldName) => {
     var digit;
 
     if (!letter.match(/[A-Z]/)) {
-        return {
-            message: `El formato del CIF no es correcto.`,
-            field: fieldName
-        }
+        return `El formato del CIF no es correcto.`
     }
 
     for (i = 0; i < digits.length; ++i) {
         digit = parseInt(digits[i]);
 
         if (isNaN(digit)) {
-            return {
-                message: `El formato del CIF no es correcto.`,
-                field: fieldName
-            }
+            return `El formato del CIF no es correcto.`
         }
 
         if (i % 2 === 0) {
@@ -104,86 +83,72 @@ exports.cif = (fieldValue, fieldName) => {
     }
 
     if (!String(digit) === control && !letters[digit] === control) {
-        return {
-            message: `El CIF no es correcto.`,
-            field: fieldName
-        }
+        return `El CIF no es correcto.`
     }
 
 }
 
 //STRING MAX EXTENSION
-exports.maxtsn = (fieldValue, fieldName, extension) => {
+exports.maxtsn = (fieldValue, extension) => {
     if (fieldValue.length > extension) {
-        return {
-            message: `El campo es demasiado largo.`,
-            field: fieldName
-        }
+        return `El campo es demasiado largo.`
     }
 }
 
 //STRING MIN EXTENSION
-exports.mnxtsn = (fieldValue, fieldName, extension) => {
+exports.mnxtsn = (fieldValue, extension) => {
     if (fieldValue.length < extension) {
-        return {
-            message: `El campo es demasiado corto.`,
-            field: fieldName
-        }
+        return `El campo es demasiado corto.`
     }
 }
 
 //JSON
-exports.jsobject = (fieldValue, fieldName) => {
+exports.jsobject = (fieldValue) => {
     if (fieldValue.constructor != ({}).constructor) {
-        return {
-            message: `El campo ${fieldName} no es un objeto JSON.`,
-            field: fieldName
-        }
+        return `El campo ${fieldName} no es un objeto JSON.`
     }
 }
 
 //NOMBRE
-exports.humanname = (fieldValue, fieldName) => {
+exports.humanname = (fieldValue) => {
     if (!/^[a-zA-Záéíóúàèìòùäëïöü]*(\s[a-zA-Záéíóúàèìòùäëïöü]*)*?$/.test(fieldValue)) {
-        return {
-            message: `El campo no es válido.`,
-            field: fieldName
-        }
+        return `El campo no es válido.`
     }
 }
 
 //TIPO DE VÍA
-exports.tipovia = (fieldValue, fieldName) => {
+exports.tipovia = (fieldValue) => {
     if (!/^(C.\/|Avda.\/|Crtra.\/)$/.test(fieldValue)) {
-        return {
-            message: `El campo no es válido.`,
-            field: fieldName
-        }
+        return `El campo no es válido.`
     }
 }
 
 //NUMERO
-exports.number = (fieldValue, fieldName) => {
+exports.number = (fieldValue) => {
     if (typeof parseInt(fieldValue) != "number") {
-        return {
-            message: `El campo no es válido.`,
-            field: fieldName
-        }
+        return `El campo no es válido.`
+    }
+}
+
+//MAYOR o MENOR
+exports.compare = (fieldValue, greaterThan = true, number = 0) => {
+    if (greaterThan && fieldValue <= number) {
+        return `El número debe ser mayor que ${number}.`
+    }
+    if (!greaterThan && fieldValue >= number) {
+        return `El número debe ser menor que ${number}.`
     }
 }
 
 //REGEX
-exports.regex = (fieldValue, fieldName, regex) => {
+exports.regex = (fieldValue, regex) => {
     if (!regex.test(fieldValue)) {
-        return {
-            message: `El campo no es válido.`,
-            field: fieldName
-        }
+        return `El campo no es válido.`
     }
 }
 
 //RAZON SOCIAL
-exports.razonsocial = (fieldValue, fieldName) => {
+exports.razonsocial = (fieldValue) => {
 
     const razonsocial =
         import ("../models/razonsocial.enum");
@@ -194,16 +159,10 @@ exports.razonsocial = (fieldValue, fieldName) => {
     const siglas = fieldValue.substr(indexSiglas, fieldValue.length);
     const nombre = fieldValue.substr(0, indexSiglas).trim();
 
-    if (JSON.stringify(this.humanname(nombre)) != "{}") {
-        return {
-            message: `El nombre no es válido.`,
-            field: fieldName
-        }
+    if (JSON.stringify(this.humanname(nombre)) != null) {
+        return `El nombre no es válido.`
     }
     if (Object.keys(razonsocial).find(key => razonsocial[key] === siglas) == undefined) {
-        return {
-            message: `Las siglas no son válidas.`,
-            field: fieldName
-        }
+        return `Las siglas no son válidas.`
     }
 }

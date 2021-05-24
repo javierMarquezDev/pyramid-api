@@ -9,6 +9,9 @@ module.exports = app => {
     // Retrieve one noticia
     router.get("/:id", noticias.findOne);
 
+    // Create one noticia
+    router.post("/", noticias.create)
+
     // Update a noticia
     router.put("/:id", noticias.update);
 

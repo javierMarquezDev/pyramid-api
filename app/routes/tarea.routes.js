@@ -9,6 +9,9 @@ module.exports = app => {
     // Retrieve one tarea
     router.get("/:id", tareas.findOne);
 
+    // Create one tarea
+    router.post("/", tareas.create)
+
     // Update a tarea
     router.put("/:id", tareas.update);
 

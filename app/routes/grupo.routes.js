@@ -9,6 +9,9 @@ module.exports = app => {
     // Retrieve one grupo
     router.get("/:id", grupos.findOne);
 
+    // Create one grupo
+    router.post("/", grupos.create)
+
     // Update a grupo
     router.put("/:id", grupos.update);
 

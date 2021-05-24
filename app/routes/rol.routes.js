@@ -9,6 +9,9 @@ module.exports = app => {
     // Retrieve one rol
     router.get("/:id", rols.findOne);
 
+    // Create one rol
+    router.post("/", rols.create)
+
     // Update a rol
     router.put("/:id", rols.update);
 
