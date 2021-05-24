@@ -4,19 +4,22 @@ module.exports = app => {
     var router = require("express").Router();
 
     // Retrieve all grupos
-    router.get("/", grupos.findAll);
+    //router.get("/", grupos.findAll);
 
     // Retrieve one grupo
-    router.get("/:id", grupos.findOne);
+    router.get("/:empresa/:id", grupos.findOne);
+
+    // Retrieve grupos from one empresa
+    router.get("/:empresa", grupos.empresa);
 
     // Create one grupo
-    router.post("/", grupos.create)
+    router.post("/:empresa", grupos.create)
 
     // Update a grupo
-    router.put("/:id", grupos.update);
+    router.put("/:empresa/:id", grupos.update);
 
     // Delete a grupo
-    router.delete("/:id", grupos.deleteOne);
+    router.delete("/:empresa/:id", grupos.deleteOne);
 
     app.use('/api/grupos', router);
 

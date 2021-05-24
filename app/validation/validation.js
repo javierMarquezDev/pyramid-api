@@ -1,3 +1,5 @@
+const rsocialsiglas = require("../models/razonsocial.enum").razonsocial;
+
 //VALIDACIÓN DE CAMPO O CADENA VACÍA
 exports.empty = (fieldValue) => {
     if (!fieldValue || fieldValue == "") {
@@ -76,10 +78,10 @@ exports.cif = (fieldValue) => {
     }
 
     if (letter.match(/[ABEH]/)) {
-        return String(digit) === control;
+        return `El CIF no es correcto.`
     }
     if (letter.match(/[NPQRSW]/)) {
-        return letters[digit] === control;
+        return `El CIF no es correcto.`
     }
 
     if (!String(digit) === control && !letters[digit] === control) {
@@ -90,7 +92,7 @@ exports.cif = (fieldValue) => {
 
 //STRING MAX EXTENSION
 exports.maxtsn = (fieldValue, extension) => {
-    if (fieldValue.length > extension) {
+    if (fieldValue == undefined || fieldValue.length > extension) {
         return `El campo es demasiado largo.`
     }
 }
@@ -150,10 +152,8 @@ exports.regex = (fieldValue, regex) => {
 //RAZON SOCIAL
 exports.razonsocial = (fieldValue) => {
 
-    const razonsocial =
-        import ("../models/razonsocial.enum");
-
     fieldValue = fieldValue.trim();
+    //hola
 
     const indexSiglas = fieldValue.lastIndexOf('S.');
     const siglas = fieldValue.substr(indexSiglas, fieldValue.length);
@@ -162,7 +162,12 @@ exports.razonsocial = (fieldValue) => {
     if (JSON.stringify(this.humanname(nombre)) != null) {
         return `El nombre no es válido.`
     }
-    if (Object.keys(razonsocial).find(key => razonsocial[key] === siglas) == undefined) {
+    if (!this.contenidoEn(siglas, rsocialsiglas)) {
         return `Las siglas no son válidas.`
     }
+}
+
+//CONTENIDO SE ENCUENTRA EN ENUM bool
+exports.contenidoEn = (value, object) => {
+    return Object.keys(object).find(key => object[key] == value) == undefined;
 }

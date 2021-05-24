@@ -20,12 +20,12 @@ exports.create = (req, res) => {
 
 // Mostrar todas las encuestas
 exports.findAll = (req, res) => {
-    Encuestas.findAll().then(data => { res.json(data) });
+    Encuestas.findAll().then(data => { res.status(200).json(data) });
 };
 
 // Mostrar según PK
 exports.findOne = (req, res) => {
-    Encuestas.findByPk(req.params.id).then(data => { res.json(data) });
+    Encuestas.findByPk(req.params.id).then(data => { res.status(200).json(data) });
 };
 
 // Modificar

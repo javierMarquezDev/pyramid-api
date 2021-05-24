@@ -1,22 +1,23 @@
 const db = require("../models");
+const validation = require("../validation/validation");
 const Empresas = db.empresas;
 const Usuarios = db.usuarios;
 
 //Crear empresa
-exports.create = (req, res) => {
+exports.create = async(req, res) => {
 
     //Validar
-    const errors = validateEmpresa(req.body);
+    const errors = await validateEmpresa(req.body);
 
     if (errors != null) {
-        res.send(errors);
+        res.status(400).send(errors);
         return;
     }
 
     const empresa = req.body;
 
     Empresas.create(empresa).then(data => {
-            res.send(data);
+            res.status(201).send(data);
         })
         .catch(err => {
             res.status(500).send({
@@ -28,12 +29,17 @@ exports.create = (req, res) => {
 
 // Mostrar todas las empresas
 exports.findAll = (req, res) => {
-    Empresas.findAll().then(data => { res.json(data) });
+    Empresas.findAll().then(data => { res.status(200).json(data) });
+};
+
+// Mostrar por nombre
+exports.name = (req, res) => {
+    Empresas.findAll({ where: { nombre: req.params.nombre } }).then(data => { res.status(200).json(data) });
 };
 
 // Mostrar según PK
 exports.findOne = (req, res) => {
-    Empresas.findByPk(req.params.id).then(data => { res.json(data) });
+    Empresas.findByPk(req.params.id).then(data => { res.status(200).json(data) });
 };
 
 // Modificar
@@ -43,7 +49,7 @@ exports.update = (req, res) => {
     const errors = validateEmpresa(req.body);
 
     if (errors != null) {
-        res.send(errors);
+        res.status(400).send(errors);
         return;
     }
 
@@ -94,7 +100,7 @@ exports.deleteOne = (req, res) => {
 }
 
 //VAlIDATE EMPRESA
-function validateEmpresa(empresa) {
+async function validateEmpresa(empresa) {
 
     var empty = true;
     var errors = {};
@@ -102,10 +108,15 @@ function validateEmpresa(empresa) {
     for (var key in empresa) {
         (errors[key] == null) ? errors[key] = {}: false;
         switch (key) {
-            case "cif":
+            case "nif":
                 errors[key].empty = validation.empty(empresa[key]);
                 errors[key].xtsn = validation.maxtsn(empresa[key], 9);
                 errors[key].format = validation.cif(empresa[key]);
+
+                //Comprobar que el CIF no está pillado
+                if (await Empresas.findByPk(empresa[key]) != null)
+                    errors[key].exists = "El CIF ya existe.";
+
                 break;
             case "razonsocial":
                 errors[key].empty = validation.empty(empresa[key]);
@@ -119,8 +130,9 @@ function validateEmpresa(empresa) {
             case "administrador":
                 errors[key].format = validation.email(empresa[key]);
 
-                //Validar si existe usuario
-                if (Usuarios.findByPk(empresa[key]) == null)
+                //Validar si existe el usuario
+                if (await Usuarios.findByPk(empresa[key]) == null)
+
                     errors[key].none = "El usuario no existe.";
 
                 break;

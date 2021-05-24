@@ -1,9 +1,8 @@
 const db = require("../models");
 const Archivos = db.archivos;
 const Tareas = db.tareas;
-const Proyectos = db.proyectos;
-const Usuarios = db.usuarios;
 const validation = require("../validation/validation");
+const fileext = require("../models/fileext.enum");
 
 //Crear archivo
 exports.create = (req, res) => {
@@ -23,12 +22,12 @@ exports.create = (req, res) => {
 
 // Mostrar todas els archivos
 exports.findAll = (req, res) => {
-    Archivos.findAll().then(data => { res.json(data) });
+    Archivos.findAll().then(data => { res.status(200).json(data) });
 };
 
 // Mostrar según PK
 exports.findOne = (req, res) => {
-    Archivos.findByPk(req.params.id).then(data => { res.json(data) });
+    Archivos.findByPk(req.params.id).then(data => { res.status(200).json(data) });
 };
 
 // Modificar
@@ -107,26 +106,12 @@ function validateArchivo(archivo) {
                 errors[key].valid = validation.number(archivo[key]);
                 errors[key].minimum = validation.compare(archivo[key]);
                 break;
-            case "administrador":
+            case "fileextletters":
                 errors[key].format = validation.email(archivo[key]);
 
-                //Validar si existe usuario
-                if (Usuarios.findByPk(archivo[key]) == null)
-                    errors[key].none = "El usuario no existe.";
+                if (!validation.contenidoEn(archivo[key], fileext))
+                    errors[key].fileext = "No es una extensión de archivo válida.";
 
-                break;
-            case "nombrevia":
-                errors[key].empty = validation.empty(archivo[key]);
-                errors[key].valid = validation.humanname(archivo[key]);
-                break;
-            case "numvia":
-                errors[key].empty = validation.empty(archivo[key]);
-                errors[key].valid = validation.regex(archivo[key], /^\w*$/);
-                break;
-            case "codigopuerta":
-                errors[key].max = validation.maxtsn(archivo[key], 5);
-                errors[key].min = validation.mnxtsn(archivo[key], 1);
-                errors[key].valid = validation.regex(archivo[key], /^\w*?(º|ª)?\w*?$/);
                 break;
             default:
                 break;

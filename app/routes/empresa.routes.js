@@ -12,6 +12,9 @@ module.exports = app => {
     // Retrieve one empresa
     router.get("/:id", empresas.findOne)
 
+    // Retrieve one empresa by nombre
+    router.get("/name/:nombre", empresas.name)
+
     // Update a Empresa
     router.put("/:id", empresas.update);
 

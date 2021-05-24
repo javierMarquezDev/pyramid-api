@@ -20,7 +20,7 @@ exports.create = (req, res) => {
 
 // Mostrar según PK
 exports.findOne = (req, res) => {
-    Encuestausuarios.findByPk(req.params.id).then(data => { res.json(data) });
+    Encuestausuarios.findByPk(req.params.id).then(data => { res.status(200).json(data) });
 };
 
 // Eliminar

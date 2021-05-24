@@ -9,7 +9,7 @@ exports.create = (req, res) => {
     const errors = validateUsuario(req.body);
 
     if (errors != null) {
-        res.send(errors);
+        res.status(400).send(errors);
         return;
     }
 
@@ -17,7 +17,7 @@ exports.create = (req, res) => {
 
     //BD
     Usuarios.create(usuario).then(data => {
-            res.status(200).send({
+            res.status(201).send({
                 message: "Usuario creado con éxito."
             });
         })
@@ -31,12 +31,12 @@ exports.create = (req, res) => {
 
 // Mostrar todos los usuarios
 exports.findAll = (req, res) => {
-    Usuarios.findAll().then(data => { res.json(data) });
+    Usuarios.findAll().then(data => { res.status(200).json(data) });
 };
 
 // Mostrar según PK
 exports.findOne = (req, res) => {
-    Usuarios.findByPk(req.params.id).then(data => { res.json(data) });
+    Usuarios.findByPk(req.params.id).then(data => { res.status(200).json(data) });
 };
 
 // Modificar
@@ -46,7 +46,7 @@ exports.update = (req, res) => {
     const errors = validateUsuario(req.body);
 
     if (errors != null) {
-        res.send(errors);
+        res.status(400).send(errors);
         return;
     }
 
