@@ -6,17 +6,20 @@ module.exports = app => {
     // Retrieve all proyectos
     router.get("/", proyectos.findAll);
 
+    // Retrieve all proyectos from one user
+    router.get("/:administrador", proyectos.administrador);
+
     // Retrieve one proyecto
-    router.get("/:id", proyectos.findOne);
+    router.get("/:administrador/:id", proyectos.findOne);
 
     // Create one proyecto
-    router.post("/", proyectos.create)
+    router.post("/:administrador", proyectos.create)
 
     // Update a proyecto
-    router.put("/:id", proyectos.update);
+    router.put("/:administrador/:id", proyectos.update);
 
     // Delete a proyecto
-    router.delete("/:id", proyectos.deleteOne);
+    router.delete("/:administrador/:id", proyectos.deleteOne);
 
     app.use('/api/proyectos', router);
 

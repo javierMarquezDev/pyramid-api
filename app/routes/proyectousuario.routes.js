@@ -7,13 +7,19 @@ module.exports = app => {
     router.get("/", proyectousuarios.findAll);
 
     // Retrieve one proyectousuario
-    router.get("/:id", proyectousuarios.findOne);
+    router.get("/:usuario/:proyectoadministrador/:proyectocodigo", proyectousuarios.findOne);
+
+    // Retrieve by usuario
+    router.get("/:usuario", proyectousuarios.usuario);
+
+    // Retrieve by proyecto
+    router.get("/:proyectoadministrador/:proyectocodigo", proyectousuarios.proyecto);
 
     // Create one proyectousuario
-    router.post("/", proyectousuarios.create)
+    router.post("/:proyectoadministrador/:proyectocodigo", proyectousuarios.create)
 
     // Update a proyectousuario
-    router.put("/:id", proyectousuarios.update);
+    router.put("/:usuario/:proyectoadministrador/:proyectocodigo", proyectousuarios.update);
 
     // Delete a proyectousuario
     router.delete("/:id", proyectousuarios.deleteOne);

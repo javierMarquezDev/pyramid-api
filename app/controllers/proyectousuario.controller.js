@@ -1,14 +1,26 @@
 const db = require("../models");
 const proyectousuarios = db.proyectousuarios;
-const Op = db.Sequelize.Op;
+const proyectos = db.proyectos;
+const usuarios = db.usuarios;
+const validation = require("../validation/validation")
 
 //Crear proyectousuario
-exports.create = (req, res) => {
+exports.create = async(req, res) => {
 
     const proyectousuario = req.body;
+    proyectousuario.proyectocodigo = req.params.proyectocodigo;
+    proyectousuario.proyectoadministrador = req.params.proyectoadministrador;
 
-    proyectousuarios.create(usuario).then(data => {
-            res.send(data);
+    //Validar
+    const errors = await validateProyectousuario(proyectousuario);
+
+    if (errors != null) {
+        res.status(400).send(errors);
+        return;
+    }
+
+    proyectousuarios.create(proyectousuario).then(data => {
+            res.status(201).send(data);
         })
         .catch(err => {
             res.status(500).send({
@@ -20,34 +32,81 @@ exports.create = (req, res) => {
 
 // Mostrar todas els proyectousuarios
 exports.findAll = (req, res) => {
-    proyectousuarios.findAll().then(data => { res.json(data) });
+    proyectousuarios.findAll().then(data => { res.status(200).json(data) });
 };
 
 // Mostrar según PK
 exports.findOne = (req, res) => {
-    proyectousuarios.findByPk(req.params.id).then(data => { res.json(data) });
+    const usuario = req.params.usuario;
+    const proyectocodigo = req.params.proyectocodigo;
+    const proyectoadministrador = req.params.proyectoadministrador;
+    proyectousuarios.findOne({
+        where: {
+            usuario: usuario,
+            proyectocodigo: proyectocodigo,
+            proyectoadministrador: proyectoadministrador
+        }
+    }).then(data => { res.status(200).json(data) });
+};
+
+// Mostrar según usuario
+exports.usuario = (req, res) => {
+    const usuario = req.params.usuario;
+
+    proyectousuarios.findAll({
+        where: {
+            usuario: usuario
+        }
+    }).then(data => { res.status(200).json(data) });
+};
+
+// Mostrar según proyecto
+exports.proyecto = (req, res) => {
+    const proyectocodigo = req.params.proyectocodigo;
+    const proyectoadministrador = req.params.proyectoadministrador;
+
+    proyectousuarios.findAll({
+        where: {
+            proyectocodigo: proyectocodigo,
+            proyectoadministrador: proyectoadministrador
+        }
+    }).then(data => { res.status(200).json(data) });
 };
 
 // Modificar
-exports.update = (req, res) => {
-    const id = req.params.id;
+exports.update = async(req, res) => {
+    const usuario = req.params.usuario;
+    const proyectocodigo = req.params.proyectocodigo;
+    const proyectoadministrador = req.params.proyectoadministrador;
+
+    //Validar
+    const errors = await validateProyectousuario(proyectousuario);
+
+    if (errors != null) {
+        res.status(400).send(errors);
+        return;
+    }
 
     proyectousuarios.update(req.body, {
-            where: { nif: id }
+            where: {
+                usuario: usuario,
+                proyectocodigo: proyectocodigo,
+                proyectoadministrador: proyectoadministrador
+            }
         }).then(num => {
             if (num == 1) {
-                res.send({
-                    message: "La proyectousuario ha sido modificado exitosamente."
+                res.status(200).send({
+                    message: "La fila ha sido modificado exitosamente."
                 });
             } else {
-                res.send({
-                    message: `No es posible modificar el proyectousuario con CIF ${id}. Compruebe el dirección o el cuerpo de el request.`
+                res.status(400).send({
+                    message: `No es posible modificar la fila. Compruebe la información.`
                 });
             }
         })
         .catch(err => {
             res.status(500).send({
-                message: "Error modificando el proyectousuario con CIF " + id + "."
+                message: "Error modificando la fila"
             });
         });
 };
@@ -60,18 +119,65 @@ exports.deleteOne = (req, res) => {
             where: { nif: id }
         }).then(num => {
             if (num == 1) {
-                res.send({
-                    message: "El proyectousuario fue eliminado con éxito."
+                res.status(200).send({
+                    message: "La fila fue eliminada con éxito."
                 });
             } else {
-                res.send({
-                    message: `No pudo eliminarse el proyectousuario con id ${id}. La id puede estar equivocada.`
+                res.status(400).send({
+                    message: `No pudo eliminarse la fila especificada.`
                 });
             }
         })
         .catch(err => {
             res.status(500).send({
-                message: "Error al intentar eliminar el proyectousuario con id " + id + "."
+                message: "Error al intentar eliminar la fila"
             });
         })
+}
+
+//VAlIDATE PROYECTOUSUARIO
+async function validateProyectousuario(proyectousuario) {
+
+    var empty = true;
+    var errors = {};
+
+    for (var key in proyectousuario) {
+        (errors[key] == null) ? errors[key] = {}: false;
+
+        switch (key) {
+            case "usuario":
+                errors[key].empty = validation.empty(proyectousuario[key]);
+
+                //Validar si existe el proyectousuario
+                if (await usuarios.findByPk(proyectousuario[key]) == null)
+                    errors[key].none = "El usuario asociado no existe";
+                break;
+
+            case "proyectocodigo":
+            case "proyectoadministrador":
+                errors[key].empty = validation.empty(proyectousuario[key]);
+
+                //Validar si existe el proyecto
+                if (validation.number(proyectousuario["proyectocodigo"]) == undefined) {
+                    if (await proyectos.findOne({ where: { codigo: proyectousuario["proyectocodigo"], administrador: proyectousuario["proyectoadministrador"] } }) == null)
+                        errors[key].none = "El proyecto asociado no existe";
+                } else {
+                    errors["proyectocodigo"].format = "Tipo no válido.";
+                }
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    for (var key in errors) {
+        if (JSON.stringify(errors[key]) != "{}") {
+            empty = false;
+            break;
+        }
+    }
+
+    (empty) ? errors = null: false;
+    return errors;
 }

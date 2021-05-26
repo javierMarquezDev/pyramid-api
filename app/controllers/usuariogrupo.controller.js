@@ -155,7 +155,6 @@ async function validateUsuariogrupo(usuariogrupo) {
 
                 //Validar si existe el grupo
                 if (validation.number(usuariogrupo["codigogrupo"]) == undefined) {
-                    console.log("\n\n\n\n\n\n\n\n" + validation.number(1) + "\n\n\n\n\n\n\n\n");
                     if (await Grupos.findOne({ where: { codigo: usuariogrupo["codigogrupo"], empresa: usuariogrupo["empresagrupo"] } }) == null)
                         errors[key].none = "El grupo asociado no existe";
                 } else {

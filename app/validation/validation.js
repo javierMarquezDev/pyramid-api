@@ -127,7 +127,7 @@ exports.tipovia = (fieldValue) => {
 
 //NUMERO
 exports.number = (fieldValue) => {
-    if (typeof fieldValue != "number") {
+    if (parseInt(fieldValue) == NaN) {
         return `El campo no es válido.`
     }
 }
