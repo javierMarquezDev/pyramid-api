@@ -4,19 +4,22 @@ module.exports = app => {
     var router = require("express").Router();
 
     // Retrieve all tareas
-    router.get("/", tareas.findAll);
+    //router.get("/", tareas.findAll);
+
+    // Retrieve all tareas from one proyecto
+    router.get("/:administradorproyecto/:codigoproyecto", tareas.proyecto);
 
     // Retrieve one tarea
-    router.get("/:id", tareas.findOne);
+    router.get("/:administradorproyecto/:codigoproyecto/:id", tareas.findOne);
 
     // Create one tarea
-    router.post("/", tareas.create)
+    router.post("/:administradorproyecto/:codigoproyecto", tareas.create)
 
     // Update a tarea
-    router.put("/:id", tareas.update);
+    router.put("/:administradorproyecto/:codigoproyecto/:id", tareas.update);
 
     // Delete a tarea
-    router.delete("/:id", tareas.deleteOne);
+    router.delete("/:administradorproyecto/:codigoproyecto/:id", tareas.deleteOne);
 
     app.use('/api/tareas', router);
 
