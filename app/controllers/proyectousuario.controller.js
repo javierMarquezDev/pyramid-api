@@ -113,10 +113,16 @@ exports.update = async(req, res) => {
 
 // Eliminar
 exports.deleteOne = (req, res) => {
-    const id = req.params.id;
+    const usuario = req.params.usuario;
+    const proyectocodigo = req.params.proyectocodigo;
+    const proyectoadministrador = req.params.proyectoadministrador;
 
     proyectousuarios.destroy({
-            where: { nif: id }
+            where: {
+                usuario: usuario,
+                proyectocodigo: proyectocodigo,
+                proyectoadministrador: proyectoadministrador
+            }
         }).then(num => {
             if (num == 1) {
                 res.status(200).send({

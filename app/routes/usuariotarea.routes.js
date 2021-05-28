@@ -6,17 +6,23 @@ module.exports = app => {
     // Retrieve all usuariotareas
     router.get("/", usuariotareas.findAll);
 
-    // Retrieve one usuariotarea
-    router.get("/:id", usuariotareas.findOne);
+    // Retrieve one
+    router.get("/:tareaadministradorproyecto/:tareacodigoproyecto/:tareacodigo/:atareado", usuariotareas.findOne);
 
     // Create one usuariotarea
-    router.post("/", usuariotareas.create)
+    router.post("/:tareaadministradorproyecto/:tareacodigoproyecto/:tareacodigo", usuariotareas.create)
 
     // Update a usuariotarea
-    router.put("/:id", usuariotareas.update);
+    router.put("/:tareaadministradorproyecto/:tareacodigoproyecto/:tareacodigo/:atareado", usuariotareas.update);
+
+    //Retrieve by usuario
+    router.get("/:atareado", usuariotareas.usuario);
+
+    //Retrieve by tarea
+    router.get("/:tareaadministradorproyecto/:tareacodigoproyecto/:tareacodigo", usuariotareas.tarea);
 
     // Delete a usuariotarea
-    router.delete("/:id", usuariotareas.deleteOne);
+    router.delete("/:tareaadministradorproyecto/:tareacodigoproyecto/:tareacodigo/:atareado", usuariotareas.deleteOne);
 
     app.use('/api/usuariotareas', router);
 
