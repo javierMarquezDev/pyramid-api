@@ -6,17 +6,20 @@ module.exports = app => {
     // Retrieve all encuestas
     router.get("/", encuestas.findAll);
 
+    // Retrieve all encuestas by usuario
+    router.get("/:autor", encuestas.usuario);
+
     // Retrieve one encuesta
-    router.get("/:id", encuestas.findOne);
+    router.get("/:autor/:id", encuestas.findOne);
 
     // Create one encuesta
-    router.post("/", encuestas.create)
+    router.post("/:autor", encuestas.create)
 
     // Update a encuesta
-    router.put("/:id", encuestas.update);
+    router.put("/:autor/:id", encuestas.update);
 
     // Delete a encuesta
-    router.delete("/:id", encuestas.deleteOne);
+    router.delete("/:autor/:id", encuestas.deleteOne);
 
     app.use('/api/encuestas', router);
 
