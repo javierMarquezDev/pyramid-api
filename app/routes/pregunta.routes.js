@@ -4,19 +4,22 @@ module.exports = app => {
     var router = require("express").Router();
 
     // Retrieve all preguntas
-    router.get("/", preguntas.findAll);
+    //router.get("/", preguntas.findAll);
+
+    //Retrieve by encuesta
+    router.get("/:encuestaautor/:encuestacodigo", preguntas.encuesta);
 
     // Retrieve one pregunta
-    router.get("/:id", preguntas.findOne);
+    router.get("/:encuestaautor/:encuestacodigo/:id", preguntas.findOne);
 
     // Create one pregunta
-    router.post("/", preguntas.create)
+    router.post("/:encuestaautor/:encuestacodigo", preguntas.create)
 
     // Update a pregunta
-    router.put("/:id", preguntas.update);
+    router.put("/:encuestaautor/:encuestacodigo/:id", preguntas.update);
 
     // Delete a pregunta
-    router.delete("/:id", preguntas.deleteOne);
+    router.delete("/:encuestaautor/:encuestacodigo/:id", preguntas.deleteOne);
 
     app.use('/api/preguntas', router);
 

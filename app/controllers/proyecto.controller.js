@@ -137,7 +137,7 @@ async function validateProyecto(proyecto) {
 
                 //2021-09-04T00:00:00.000+02:00
 
-                if (isNaN(Date.parse(tarea[key]))) {
+                if (isNaN(Date.parse(proyecto[key]))) {
                     errors[key].format = "No es una fecha válida."
                 } else {
                     proyecto[key] = new Date(Date.parse(proyecto[key])).toISOString();
