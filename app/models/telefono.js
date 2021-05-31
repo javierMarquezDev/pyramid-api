@@ -8,7 +8,7 @@ module.exports = function(sequelize, Sequelize) {
         },
         usuario: {
             type: Sequelize.STRING(30),
-            allowNull: false,
+            allowNull: true,
             references: {
                 model: 'usuario',
                 key: 'email'
@@ -16,7 +16,7 @@ module.exports = function(sequelize, Sequelize) {
         },
         empresa: {
             type: Sequelize.STRING(9),
-            allowNull: false,
+            allowNull: true,
             references: {
                 model: 'empresa',
                 key: 'nif'

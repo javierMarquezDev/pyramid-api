@@ -10,7 +10,14 @@ exports.empty = (fieldValue) => {
 //E-MAIL
 exports.email = (fieldValue) => {
     if (!/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(fieldValue)) {
-        return `${fieldName} no es un e-mail correcto.`
+        return `${fieldValue} no es un e-mail correcto.`
+    }
+}
+
+//TELÉFONO
+exports.tfn = (fieldValue) => {
+    if (!/^\+(9[976]\d|8[987530]\d|6[987]\d|5[90]\d|42\d|3[875]\d|2[98654321]\d|9[8543210]|8[6421]|6[6543210]|5[87654321]|4[987654310]|3[9643210]|2[70]|7|1)\d{1,14}$/.test(fieldValue)) {
+        return `${fieldValue} no es un teléfono correcto.`
     }
 }
 
@@ -107,7 +114,7 @@ exports.mnxtsn = (fieldValue, extension) => {
 //JSON
 exports.jsobject = (fieldValue) => {
     if (fieldValue.constructor != ({}).constructor) {
-        return `El campo ${fieldName} no es un objeto JSON.`
+        return `El campo ${fieldValue} no es un objeto JSON.`
     }
 }
 

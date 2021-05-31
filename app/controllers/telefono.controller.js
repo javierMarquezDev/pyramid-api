@@ -1,77 +1,156 @@
 const db = require("../models");
 const telefonos = db.telefonos;
+const Usuarios = db.usuarios;
+const Empresas = db.empresas;
+
+const validation = require("../validation/validation")
 const Op = db.Sequelize.Op;
 
 //Crear telefono
-exports.create = (req, res) => {
+exports.create = async(req, res) => {
 
     const telefono = req.body;
 
-    telefonos.create(usuario).then(data => {
+    (req.params.usuario == undefined) ? true: telefono.usuario = req.params.usuario;
+    (req.params.empresa == undefined) ? true: telefono.empresa = req.params.empresa;
+
+    //Validar
+    const errors = await validateRol(telefono);
+
+    if (errors != null) {
+        res.status(400).send(errors);
+        return;
+    }
+
+    telefonos.create(telefono).then(data => {
             res.send(data);
         })
         .catch(err => {
             res.status(500).send({
-                message: err.message || "Error creando el telefono."
+                message: err.message || "Error creando el teléfono."
             });
         });
 
 }
 
-// Mostrar todas els telefonos
+// Mostrar todas las telefonos
 exports.findAll = (req, res) => {
-    telefonos.findAll().then(data => { res.json(data) });
+    telefonos.findAll().then(data => { res.status(200).json(data) });
 };
 
 // Mostrar según PK
-exports.findOne = (req, res) => {
-    telefonos.findByPk(req.params.id).then(data => { res.json(data) });
+exports.findOne = async(req, res) => {
+    var numero = req.params.numero;
+
+    telefonos.findOne({ where: { telefono: numero } }).then(data => { res.status(200).json(data) });
 };
 
-// Modificar
-exports.update = (req, res) => {
-    const id = req.params.id;
+// Mostrar según usuario
+exports.usuario = (req, res) => {
+    const usuario = req.params.usuario;
+    telefonos.findAll({ where: { usuario: usuario } }).then(data => { res.status(200).json(data) });
+};
 
-    telefonos.update(req.body, {
-            where: { nif: id }
-        }).then(num => {
+// Mostrar según empresa
+exports.empresa = (req, res) => {
+    const empresa = req.params.empresa;
+    telefonos.findAll({ where: { empresa: empresa } }).then(data => { res.status(200).json(data) });
+};
+
+
+// Modificar
+exports.update = async(req, res) => {
+    const usuario = req.params.usuario;
+    const numero = req.params.numero;
+
+    telefonos.update(req.body, { where: { usuario: usuario, numero: numero } }).then(num => {
             if (num == 1) {
                 res.send({
-                    message: "La telefono ha sido modificado exitosamente."
+                    message: "El teléfono ha sido modificado exitosamente."
                 });
             } else {
                 res.send({
-                    message: `No es posible modificar el telefono con CIF ${id}. Compruebe el dirección o el cuerpo de el request.`
+                    message: `No es posible modificar el teléfono. Compruebe la dirección o el cuerpo de la request.`
                 });
             }
         })
         .catch(err => {
             res.status(500).send({
-                message: "Error modificando el telefono con CIF " + id + "."
+                message: "Error modificando el teléfono."
             });
         });
 };
 
-// Eliminar
+// ELiminar
 exports.deleteOne = (req, res) => {
-    const id = req.params.id;
+    const usuario = req.params.usuario;
+    const numero = req.params.numero;
 
-    telefonos.destroy({
-            where: { nif: id }
-        }).then(num => {
+    telefonos.destroy({ where: { usuario: usuario, numero: numero } }).then(num => {
             if (num == 1) {
                 res.send({
-                    message: "El telefono fue eliminado con éxito."
+                    message: "El teléfono fue eliminado con éxito."
                 });
             } else {
                 res.send({
-                    message: `No pudo eliminarse el telefono con id ${id}. La id puede estar equivocada.`
+                    message: `No pudo eliminarse el teléfono. La información puede estar equivocada.`
                 });
             }
         })
         .catch(err => {
             res.status(500).send({
-                message: "Error al intentar eliminar el telefono con id " + id + "."
+                message: "Error al intentar eliminar el teléfono."
             });
         })
+}
+
+//VAlIDATE NOTICIA
+async function validateRol(telefono) {
+
+    var empty = true;
+    var errors = {};
+
+    for (var key in telefono) {
+        (errors[key] == null) ? errors[key] = {}: false;
+
+        switch (key) {
+            case "telefono":
+                errors[key].empty = validation.empty(telefono[key]);
+                errors[key].format = validation.tfn(telefono[key]);
+
+                break;
+            case "usuario":
+
+                //Validar si existe el usuario
+                if (await Usuarios.findByPk(telefono[key]) == null)
+                    errors[key].none = "El usuario no existe.";
+
+                break;
+
+            case "empresa":
+
+                //Validar si existe la empresa
+                if (await Empresas.findByPk(telefono[key]) == null)
+                    errors[key].none = "La empresa no existe.";
+
+                break;
+
+            default:
+                break;
+        }
+        if (validation.empty(telefono["empresa"]) != null && validation.empty(telefono["usuario"]) != null) {
+            errors["usuario"].empty = "Ambos campos no pueden estar vacíos.";
+            errors["empresa"].empty = "Ambos campos no pueden estar vacíos.";
+        }
+    }
+
+    for (var key in errors) {
+        if (JSON.stringify(errors[key]) != "{}") {
+            empty = false;
+            break;
+        }
+    }
+
+    (empty) ? errors = null: false;
+    return errors;
 }
