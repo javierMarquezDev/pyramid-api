@@ -1,6 +1,12 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, Sequelize) {
     return sequelize.define('sesion', {
+        codigo: {
+            autoIncrement: true,
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            primaryKey: true
+        },
         usuario: {
             type: Sequelize.STRING(30),
             allowNull: false,
@@ -14,7 +20,7 @@ module.exports = function(sequelize, Sequelize) {
             type: Sequelize.DATE,
             allowNull: false,
             defaultValue: Sequelize.Sequelize.fn('now'),
-            primaryKey: true
+            primaryKey: false
         },
         horafin: {
             type: Sequelize.DATE,

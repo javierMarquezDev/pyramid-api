@@ -1,77 +1,162 @@
 const db = require("../models");
+const sesion = require("../models/sesion");
 const sesions = db.sesiones;
+const Usuarios = db.usuarios;
+
+const validation = require("../validation/validation")
 const Op = db.Sequelize.Op;
 
 //Crear sesion
-exports.create = (req, res) => {
+exports.create = async(req, res) => {
 
     const sesion = req.body;
 
-    sesions.create(usuario).then(data => {
+    sesion.usuario = req.params.usuario;
+
+    //Validar
+    const errors = await validateRol(sesion);
+
+    if (errors != null) {
+        res.status(400).send(errors);
+        return;
+    }
+
+    sesions.create(sesion).then(data => {
             res.send(data);
         })
         .catch(err => {
             res.status(500).send({
-                message: err.message || "Error creando el sesion."
+                message: err.message || "Error creando la sesión."
             });
         });
 
 }
 
-// Mostrar todas els sesions
+// Mostrar todas las sesions
 exports.findAll = (req, res) => {
-    sesions.findAll().then(data => { res.json(data) });
+    sesions.findAll().then(data => { res.status(200).json(data) });
 };
 
 // Mostrar según PK
-exports.findOne = (req, res) => {
-    sesions.findByPk(req.params.id).then(data => { res.json(data) });
+exports.findOne = async(req, res) => {
+    const usuario = req.params.usuario;
+    var codigo = req.params.codigo;
+
+    sesions.findOne({ where: { usuario: usuario, codigo: codigo } }).then(data => { res.status(200).json(data) });
 };
 
-// Modificar
-exports.update = (req, res) => {
-    const id = req.params.id;
+// Mostrar según usuario
+exports.usuario = (req, res) => {
+    const usuario = req.params.usuario;
+    sesions.findAll({ where: { usuario: usuario } }).then(data => { res.status(200).json(data) });
+};
 
-    sesions.update(req.body, {
-            where: { nif: id }
-        }).then(num => {
+
+// Modificar
+exports.update = async(req, res) => {
+    const usuario = req.params.usuario;
+    const codigo = req.params.codigo;
+
+    sesions.update(req.body, { where: { usuario: usuario, codigo: codigo } }).then(num => {
             if (num == 1) {
                 res.send({
-                    message: "La sesion ha sido modificado exitosamente."
+                    message: "La sesión ha sido modificada exitosamente."
                 });
             } else {
                 res.send({
-                    message: `No es posible modificar el sesion con CIF ${id}. Compruebe el dirección o el cuerpo de el request.`
+                    message: `No es posible modificar la sesión. Compruebe la dirección o el cuerpo de la request.`
                 });
             }
         })
         .catch(err => {
             res.status(500).send({
-                message: "Error modificando el sesion con CIF " + id + "."
+                message: "Error modificando la sesión."
             });
         });
 };
 
-// Eliminar
+// ELiminar
 exports.deleteOne = (req, res) => {
-    const id = req.params.id;
+    const usuario = req.params.usuario;
+    const codigo = req.params.codigo;
 
-    sesions.destroy({
-            where: { nif: id }
-        }).then(num => {
+    sesions.destroy({ where: { usuario: usuario, codigo: codigo } }).then(num => {
             if (num == 1) {
                 res.send({
-                    message: "El sesion fue eliminado con éxito."
+                    message: "La sesión fue eliminado con éxito."
                 });
             } else {
                 res.send({
-                    message: `No pudo eliminarse el sesion con id ${id}. La id puede estar equivocada.`
+                    message: `No pudo eliminarse la sesión. La información puede estar equivocada.`
                 });
             }
         })
         .catch(err => {
             res.status(500).send({
-                message: "Error al intentar eliminar el sesion con id " + id + "."
+                message: "Error al intentar eliminar la sesión."
             });
         })
+}
+
+//VAlIDATE NOTICIA
+async function validateRol(sesion) {
+
+    var empty = true;
+    var errors = {};
+
+    for (var key in sesion) {
+        (errors[key] == null) ? errors[key] = {}: false;
+
+        switch (key) {
+            case "codigo":
+                if (validation.number(sesion["codigo"]) != undefined)
+                    errors["codigo"].format = "Tipo no válido.";
+
+                break;
+            case "usuario":
+                errors[key].format = validation.empty(sesion[key]);
+
+                //Validar si existe el usuario
+                if (await Usuarios.findByPk(sesion[key]) == null)
+                    errors[key].none = "El usuario no existe.";
+
+                break;
+            case "horainicio":
+                errors[key].empty = validation.empty(sesion[key]);
+
+                //2021-09-04T00:00:00.000+02:00
+
+                if (isNaN(Date.parse(sesion[key]))) {
+                    errors[key].format = "No es una fecha válida."
+                } else {
+                    sesion[key] = new Date(Date.parse(sesion[key])).toISOString();
+                }
+
+                break;
+            case "horafin":
+
+                //2021-09-04T00:00:00.000+02:00
+
+                if (isNaN(Date.parse(sesion[key]))) {
+                    errors[key].format = "No es una fecha válida."
+                } else {
+                    sesion[key] = new Date(Date.parse(sesion[key])).toISOString();
+                }
+
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    for (var key in errors) {
+        if (JSON.stringify(errors[key]) != "{}") {
+            empty = false;
+            break;
+        }
+    }
+
+    (empty) ? errors = null: false;
+    return errors;
 }
