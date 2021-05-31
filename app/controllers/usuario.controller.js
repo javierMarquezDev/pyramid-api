@@ -39,6 +39,11 @@ exports.findOne = (req, res) => {
     Usuarios.findByPk(req.params.id).then(data => { res.status(200).json(data) });
 };
 
+// Mostrar según rol
+exports.rol = (req, res) => {
+    Usuarios.findAll({ where: { rol: req.params.rol } }).then(data => { res.status(200).json(data) });
+};
+
 // Modificar
 exports.update = (req, res) => {
 
