@@ -15,7 +15,7 @@ exports.create = async(req, res) => {
     (req.params.empresa == undefined) ? true: telefono.empresa = req.params.empresa;
 
     //Validar
-    const errors = await validateRol(telefono);
+    const errors = await validateTfn(telefono);
 
     if (errors != null) {
         res.status(400).send(errors);
@@ -105,7 +105,7 @@ exports.deleteOne = (req, res) => {
 }
 
 //VAlIDATE NOTICIA
-async function validateRol(telefono) {
+async function validateTfn(telefono) {
 
     var empty = true;
     var errors = {};

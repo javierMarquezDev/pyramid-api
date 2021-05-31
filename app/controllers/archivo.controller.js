@@ -5,9 +5,17 @@ const validation = require("../validation/validation");
 const fileext = require("../models/fileext.enum");
 
 //Crear archivo
-exports.create = (req, res) => {
+exports.create = async(req, res) => {
 
     const archivo = req.body;
+
+    //Validar
+    const errors = await validateArchivo(archivo);
+
+    if (errors != null) {
+        res.status(400).send(errors);
+        return;
+    }
 
     Archivos.create(usuario).then(data => {
             res.send(data);
@@ -31,8 +39,18 @@ exports.findOne = (req, res) => {
 };
 
 // Modificar
-exports.update = (req, res) => {
+exports.update = async(req, res) => {
     const id = req.params.id;
+
+    const archivo = req.body;
+
+    //Validar
+    const errors = await validateArchivo(archivo);
+
+    if (errors != null) {
+        res.status(400).send(errors);
+        return;
+    }
 
     Archivos.update(req.body, {
             where: { nif: id }
@@ -101,6 +119,9 @@ function validateArchivo(archivo) {
                     }) == null)
                     errors[key].none = "La tarea asociada no existe o el código es incorrecto.";
 
+                break;
+            case "archivo":
+                errors[key].xtsn = validation.maxtsn(mensaje[key], 64000);
                 break;
             case "maxsizekb":
                 errors[key].valid = validation.number(archivo[key]);
