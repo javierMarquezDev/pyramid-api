@@ -6,17 +6,23 @@ module.exports = app => {
     // Retrieve all rolusuarios
     router.get("/", rolusuarios.findAll);
 
+    // Retrieve all usuarios by rol
+    router.get("/:rol", rolusuarios.rol);
+
+    // Retrieve all rols by usuario
+    router.get("/:usuario", rolusuarios.usuario);
+
     // Retrieve one rolusuario
-    router.get("/:id", rolusuarios.findOne);
+    router.get("/:rol/:usuario", rolusuarios.findOne);
 
     // Create one rolusuario
     router.post("/", rolusuarios.create)
 
     // Update a rolusuario
-    router.put("/:id", rolusuarios.update);
+    router.put("/:rol/:usuario", rolusuarios.update);
 
     // Delete a rolusuario
-    router.delete("/:id", rolusuarios.deleteOne);
+    router.delete("/:rol/:usuario", rolusuarios.deleteOne);
 
     app.use('/api/rolusuarios', router);
 

@@ -14,7 +14,7 @@ module.exports = app => {
     router.get("/:id", rols.findOne);
 
     //Retrieve usuarios by rol
-    //router.get("/:rol/usuarios", rolusuarios.rol);
+    router.get("/:rol/usuarios", rolusuarios.rol);
 
     // Create one rol
     router.post("/", rols.create)
