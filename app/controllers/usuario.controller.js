@@ -3,7 +3,7 @@ const Usuarios = db.usuarios;
 const validation = require("../validation/validation");
 
 // Crear
-exports.create = (req, res) => {
+exports.create = async(req, res) => {
 
     //Validar
     const errors = validateUsuario(req.body);
@@ -36,7 +36,10 @@ exports.findAll = (req, res) => {
 
 // Mostrar según PK
 exports.findOne = (req, res) => {
-    Usuarios.findByPk(req.params.id).then(data => { res.status(200).json(data) });
+    Usuarios.findByPk(req.params.id).then(data => {
+        console.log(data.dataValues);
+        res.status(200).json(data);
+    });
 };
 
 // Mostrar según rol
@@ -45,7 +48,7 @@ exports.rol = (req, res) => {
 };
 
 // Modificar
-exports.update = (req, res) => {
+exports.update = async(req, res) => {
 
     //Validar
     const errors = validateUsuario(req.body);
@@ -73,7 +76,7 @@ exports.update = (req, res) => {
         })
         .catch(err => {
             res.status(500).send({
-                message: "Error modificando el usuario con dirección de correo " + id + "."
+                message: "Error modificando el usuario con dirección de correo " + id + ". " + err
             });
         });
 };
@@ -113,6 +116,13 @@ function validateUsuario(usuario) {
                 errors.email.empty = validation.empty(usuario[key]);
                 errors.email.xtsn = validation.maxtsn(usuario[key], 50);
                 errors.email.format = validation.email(usuario[key]);
+                break;
+            case "contrasena":
+                errors[key].empty = validation.empty(usuario[key]);
+                errors[key].xtsn = validation.maxtsn(usuario[key], 30);
+                if (errors[key].empty == undefined && errors[key].xtsn == undefined) {
+                    usuario[key] = Usuarios.generateHash(usuario[key]);
+                }
                 break;
             case "nombre":
             case "apellido1":

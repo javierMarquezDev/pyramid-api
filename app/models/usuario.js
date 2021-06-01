@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt')
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, Sequelize) {
     const Usuario = sequelize.define('usuario', {
@@ -47,6 +48,9 @@ module.exports = function(sequelize, Sequelize) {
             type: Sequelize.JSON,
             allowNull: false,
             defaultValue: {}
+        },
+        counter: {
+            type: Sequelize.VIRTUAL
         }
     }, {
         sequelize,
@@ -69,5 +73,10 @@ module.exports = function(sequelize, Sequelize) {
             },
         ]
     });
+
+    Usuario.generateHash = function(value) {
+        return bcrypt.hashSync(value, bcrypt.genSaltSync(10), null)
+    }
+
     return Usuario;
 };
