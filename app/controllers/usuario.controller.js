@@ -6,7 +6,7 @@ const validation = require("../validation/validation");
 exports.create = async(req, res) => {
 
     //Validar
-    const errors = validateUsuario(req.body);
+    const errors = await validateUsuario(req.body);
 
     if (errors != null) {
         res.status(400).send(errors);
@@ -35,11 +35,18 @@ exports.findAll = (req, res) => {
 };
 
 // Mostrar según PK
-exports.findOne = (req, res) => {
-    Usuarios.findByPk(req.params.id).then(data => {
-        console.log(data.dataValues);
-        res.status(200).json(data);
-    });
+exports.findOne = async(req, res) => {
+    try {
+
+        await Usuarios.findByPk(req.params.id).then(data => {
+            console.log(data.dataValues);
+            res.status(200).json(data);
+        });
+
+    } catch (UnhandledPromiseRejectionWarning) {
+        res.status(400).json({ error: "Usuario no encontrado" });
+    }
+
 };
 
 // Mostrar según rol
@@ -51,7 +58,7 @@ exports.rol = (req, res) => {
 exports.update = async(req, res) => {
 
     //Validar
-    const errors = validateUsuario(req.body);
+    const errors = await validateUsuario(req.body);
 
     if (errors != null) {
         res.status(400).send(errors);
@@ -106,8 +113,47 @@ exports.deleteOne = (req, res) => {
         })
 }
 
+//Añadir notificaciones
+exports.addNotification = async(req, res) => {
+    const id = req.params.id;
+    const notificacion = req.body;
 
-function validateUsuario(usuario) {
+    console.log(req.body);
+
+    var notificaciones = await Usuarios.findByPk(id).then(data => { return data.dataValues.notificaciones });
+
+    notificacionArray = Array.from(notificaciones);
+
+    notificacionArray.push(notificacion);
+
+    const body = { "notificaciones": notificacionArray };
+
+    Usuarios.update(
+            body, {
+                where: { email: id }
+            }).then(num => {
+            if (num == 1) {
+                res.send({
+                    message: "La notificación ha sido añadida exitosamente."
+                });
+            } else {
+                res.send({
+                    message: `No es posible añadir la notificación.` +
+                        `Compruebe la dirección o el cuerpo de la request.`
+                });
+            }
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: "Error modificando la notificación con dirección de correo. " + err
+            });
+        });
+}
+
+//Eliminar notificaciones
+
+
+async function validateUsuario(usuario) {
     var empty = true;
     var errors = {};
     for (var key in usuario) {
@@ -117,6 +163,8 @@ function validateUsuario(usuario) {
                 errors.email.empty = validation.empty(usuario[key]);
                 errors.email.xtsn = validation.maxtsn(usuario[key], 50);
                 errors.email.format = validation.email(usuario[key]);
+                var duplicateEmail = await Usuarios.findByPk(usuario.email);
+                (duplicateEmail == null) ? false: errors.email.unique = "El email debe ser único";
                 break;
             case "contrasena":
                 errors[key].empty = validation.empty(usuario[key]);
@@ -135,6 +183,8 @@ function validateUsuario(usuario) {
             case "dni":
                 errors.dni.empty = validation.empty(usuario[key]);
                 errors.dni.valid = validation.dni(usuario[key]);
+                var duplicateDni = await Usuarios.findOne({ where: { dni: usuario.dni } });
+                (duplicateDni == null) ? false: errors.dni.unique = "El dni debe ser único";
                 break;
             case "tipovia":
                 errors.tipovia.empty = validation.empty(usuario[key]);
