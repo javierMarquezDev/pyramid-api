@@ -70,7 +70,8 @@ exports.update = async(req, res) => {
                 });
             } else {
                 res.send({
-                    message: `No es posible modificar el usuario con dirección de correo ${id}. Compruebe la dirección o el cuerpo de la request.`
+                    message: `No es posible modificar el usuario con dirección de correo ${id}.` +
+                        `Compruebe la dirección o el cuerpo de la request.`
                 });
             }
         })
