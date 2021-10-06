@@ -16,7 +16,10 @@ module.exports = app => {
     router.put("/:id", usuarios.update);
 
     // Create notificacion
-    router.put("/:id/notificaciones", usuarios.addNotification);
+    router.post("/:id/notificaciones", usuarios.addNotification);
+
+    // Remove notificacion
+    router.delete("/:id/notificaciones", usuarios.removeNotification);
 
     // Delete a Usuario
     router.delete("/:id", usuarios.deleteOne);

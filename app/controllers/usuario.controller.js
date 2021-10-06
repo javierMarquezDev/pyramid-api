@@ -124,6 +124,8 @@ exports.addNotification = async(req, res) => {
 
     notificacionArray = Array.from(notificaciones);
 
+    notificacion["codigo"] = notificacionArray[notificacionArray.length - 1].codigo + 1;
+
     notificacionArray.push(notificacion);
 
     const body = { "notificaciones": notificacionArray };
@@ -151,7 +153,46 @@ exports.addNotification = async(req, res) => {
 }
 
 //Eliminar notificaciones
+exports.removeNotification = async(req, res) => {
+    const id = req.params.id;
+    const notificacion = req.body.codigo;
 
+    var notificaciones = await Usuarios.findByPk(id).then(data => { return data.dataValues.notificaciones });
+
+    notificacionArray = Array.from(notificaciones);
+
+    var i = 0;
+    var found = NaN;
+
+    notificacionArray.forEach(element => {
+        i++;
+        if (element.codigo == notificacion) { found = i - 1; }
+    });
+    if (found != NaN) notificacionArray.splice(found, 1);
+
+    const body = { "notificaciones": notificacionArray };
+
+    Usuarios.update(
+            body, {
+                where: { email: id }
+            }).then(num => {
+            if (num == 1) {
+                res.send({
+                    message: "La notificación ha sido eliminada exitosamente."
+                });
+            } else {
+                res.send({
+                    message: `No es posible eliminar la notificación.` +
+                        `Compruebe la dirección o el cuerpo de la request.`
+                });
+            }
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: "Error modificando la notificación con dirección de correo. " + err
+            });
+        });
+}
 
 async function validateUsuario(usuario) {
     var empty = true;

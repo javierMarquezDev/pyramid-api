@@ -1,3 +1,4 @@
+const { encuestas } = require("../models");
 const db = require("../models");
 const Encuestas = db.encuestas;
 const Usuarios = db.usuarios;
@@ -114,6 +115,10 @@ async function validateEncuesta(encuesta) {
         (errors[key] == null) ? errors[key] = {}: false;
 
         switch (key) {
+            case "codigo":
+                var duplicate = await Encuestas.findByPk(encuesta.codigo);
+                (duplicate == null) ? false: errors[key].unique = "El dato debe ser único";
+                break;
             case "autor":
                 errors[key].empty = validation.empty(encuesta[key]);
 

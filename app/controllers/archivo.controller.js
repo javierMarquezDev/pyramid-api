@@ -97,7 +97,7 @@ exports.deleteOne = (req, res) => {
 }
 
 //VAlIDATE ARCHIVO
-function validateArchivo(archivo) {
+async function validateArchivo(archivo) {
 
     var empty = true;
     var errors = {};
@@ -122,6 +122,8 @@ function validateArchivo(archivo) {
                 break;
             case "archivo":
                 errors[key].xtsn = validation.maxtsn(mensaje[key], 64000);
+                var duplicate = await Archivos.findOne({ where: { archivo: archivo.archivo } });
+                (duplicate == null) ? false: errors[key].unique = "El dato debe ser único";
                 break;
             case "maxsizekb":
                 errors[key].valid = validation.number(archivo[key]);
