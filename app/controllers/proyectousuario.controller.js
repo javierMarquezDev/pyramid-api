@@ -78,6 +78,10 @@ exports.update = async(req, res) => {
     const usuario = req.params.usuario;
     const proyectocodigo = req.params.proyectocodigo;
     const proyectoadministrador = req.params.proyectoadministrador;
+    var proyectousuario = req.body;
+    proyectousuario.usuario = usuario;
+    proyectousuario.proyectocodigo = proyectocodigo;
+    proyectousuario.proyectoadministrador = proyectoadministrador;
 
     //Validar
     const errors = await validateProyectousuario(proyectousuario);
@@ -172,6 +176,7 @@ async function validateProyectousuario(proyectousuario) {
                 }
                 break;
             default:
+                delete proyectousuario[key];
                 break;
         }
 

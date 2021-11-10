@@ -1,0 +1,19 @@
+X	Empresa
+X	Usuario
+X	Grupo
+X	Noticia
+X	Notificación
+X	Encuesta
+X	Tarea
+X	Rol
+-	Mensaje?
+X	Pregunta
+X	Proyecto
+-	Sesion?
+?	Telefono
+X	Usuariogrupo
+X	Usuariotarea
+X	Proyectousuario
+	Encuestausuario
+	Rolusuario
+	

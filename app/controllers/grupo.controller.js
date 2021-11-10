@@ -144,13 +144,14 @@ async function validateGrupo(grupo) {
                 if (await grupos.findOne({
                         where: {
                             codigo: grupo["codigosub"],
-                            codigoproyecto: grupo["empresasub"]
+                            empresasub: grupo["empresasub"]
                         }
                     }) == null)
                     errors[key].none = "El subgrupo no existe o el código es incorrecto.";
 
                 break;
             default:
+                delete grupo[key];
                 break;
         }
     }

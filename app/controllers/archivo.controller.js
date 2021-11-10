@@ -18,11 +18,11 @@ exports.create = async(req, res) => {
     }
 
     Archivos.create(usuario).then(data => {
-            res.send(data);
+            res.status(201).send(data);
         })
         .catch(err => {
             res.status(500).send({
-                message: err.message || "Error creando el archivo."
+                message: "Error creando el archivo."
             });
         });
 

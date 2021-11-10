@@ -9,26 +9,29 @@ const Op = db.Sequelize.Op;
 //Crear noticia
 exports.create = async(req, res) => {
 
-    const noticia = req.body;
-
-    noticia.grupoempresa = req.params.grupoempresa;
-    noticia.grupocodigo = req.params.grupocodigo;
-    noticia.autor = req.params.autor;
+    console.log(req.body);
 
     //Validar
-    const errors = await validateNoticia(noticia);
+    const errors = await validateNoticia(req.body);
 
     if (errors != null) {
         res.status(400).send(errors);
         return;
     }
 
+    const noticia = req.body;
+
+    noticia.grupoempresa = req.params.grupoempresa;
+    noticia.grupocodigo = req.params.grupocodigo;
+    noticia.autor = req.params.autor;
+
     Noticias.create(noticia).then(data => {
-            res.send(data);
+            res.status(201).send(data);
+
         })
         .catch(err => {
             res.status(500).send({
-                message: err.message || "Error creando la noticia."
+                message: err.message + " Error creando la noticia."
             });
         });
 
@@ -40,28 +43,32 @@ exports.findAll = (req, res) => {
 };*/
 
 // Mostrar según PK
-exports.findOne = (req, res) => {
+exports.findOne = async (req, res) => {
     const grupoempresa = req.params.grupoempresa;
     const grupocodigo = req.params.grupocodigo;
     const autor = req.params.autor;
     const codigo = req.params.codigo;
 
-    Noticias.findOne({ where: { codigo: codigo, grupoempresa: grupoempresa, grupocodigo: grupocodigo, autor: autor } }).then(data => { res.status(200).json(data) });
+    await Noticias.findOne({ where: { codigo: codigo, grupoempresa: grupoempresa, grupocodigo: grupocodigo, autor: autor } }).then(data => { res.status(200).json(data) });
 };
 
 // Mostrar según grupo
-exports.grupo = (req, res) => {
+exports.grupo = async (req, res) => {
+    try {
     const grupoempresa = req.params.grupoempresa;
     const grupocodigo = req.params.grupocodigo;
-    Noticias.findAll({ where: { grupoempresa: grupoempresa, grupocodigo: grupocodigo } }).then(data => { res.status(200).json(data) });
+    await Noticias.findAll({ where: { grupoempresa: grupoempresa, grupocodigo: grupocodigo } }).then(data => { res.status(200).json(data) });
+} catch (UnhandledPromiseRejectionWarning) {
+    res.status(400).json({ error: "No hay datos." });
+}
 };
 
 // Mostrar según autor
-exports.usuario = (req, res) => {
+exports.usuario = async (req, res) => {
     const grupoempresa = req.params.grupoempresa;
     const grupocodigo = req.params.grupocodigo;
     const autor = req.params.autor;
-    Noticias.findAll({ where: { grupoempresa: grupoempresa, grupocodigo: grupocodigo, autor: autor } }).then(data => { res.status(200).json(data) });
+    await Noticias.findAll({ where: { grupoempresa: grupoempresa, grupocodigo: grupocodigo, autor: autor } }).then(data => { res.status(200).json(data) });
 };
 
 
@@ -72,6 +79,11 @@ exports.update = async(req, res) => {
     const autor = req.params.autor;
     const codigo = req.params.codigo;
 
+    noticia.grupoempresa = grupoempresa;
+    noticia.grupocodigo = grupocodigo;
+    noticia.autor = autor;
+    noticia.codigo = codigo;
+
     //Validar
     const errors = await validateNoticia(noticia);
 
@@ -80,12 +92,12 @@ exports.update = async(req, res) => {
         return;
     }
 
-    Noticias.update(req.body, {
+    await Noticias.update(noticia, {
             where: { codigo: codigo, grupoempresa: grupoempresa, grupocodigo: grupocodigo, autor: autor }
         }).then(num => {
             if (num == 1) {
                 res.send({
-                    message: "La noticia ha sido modificado exitosamente."
+                    message: "La noticia ha sido modificada exitosamente."
                 });
             } else {
                 res.send({
@@ -101,13 +113,13 @@ exports.update = async(req, res) => {
 };
 
 // ELiminar
-exports.deleteOne = (req, res) => {
+exports.deleteOne = async (req, res) => {
     const grupoempresa = req.params.grupoempresa;
     const grupocodigo = req.params.grupocodigo;
     const autor = req.params.autor;
     const codigo = req.params.codigo;
 
-    Noticias.destroy({ where: { codigo: codigo, grupoempresa: grupoempresa, grupocodigo: grupocodigo, autor: autor } }).then(num => {
+    await Noticias.destroy({ where: { codigo: codigo, grupoempresa: grupoempresa, grupocodigo: grupocodigo, autor: autor } }).then(num => {
             if (num == 1) {
                 res.send({
                     message: "la noticia fue eliminada con éxito."
@@ -135,12 +147,6 @@ async function validateNoticia(noticia) {
         (errors[key] == null) ? errors[key] = {}: false;
 
         switch (key) {
-            case "codigo":
-                //errors[key].empty = validation.empty(noticia[key]);
-                if (validation.number(noticia[key]) == undefined) {
-                    errors[key].valid = "Tipo no válido.";
-                }
-
             case "grupocodigo":
             case "grupoempresa":
 
@@ -166,7 +172,7 @@ async function validateNoticia(noticia) {
                 break;
             case "texto":
                 errors[key].empty = validation.empty(noticia[key]);
-                errors[key].xtsn = validation.maxtsn(noticia[key], 1000);
+                errors[key].xtsn = validation.maxtsn(noticia[key], 400);
                 break;
             case "imagen1":
             case "imagen2":
@@ -176,6 +182,7 @@ async function validateNoticia(noticia) {
                 break;
 
             default:
+                delete noticia[key];
                 break;
         }
     }

@@ -27,13 +27,13 @@ exports.create = async(req, res) => {
         })
         .catch(err => {
             res.status(500).send({
-                message: err.message || "Error creando el teléfono."
+                message: "Error creando el teléfono."
             });
         });
 
 }
 
-// Mostrar todas las telefonos
+// Mostrar todas los telefonos
 exports.findAll = (req, res) => {
     telefonos.findAll().then(data => { res.status(200).json(data) });
 };
@@ -60,12 +60,25 @@ exports.empresa = (req, res) => {
 
 // Modificar
 exports.update = async(req, res) => {
-    const usuario = req.params.usuario;
     const numero = req.params.numero;
+    var telefono = req.body;
 
-    telefonos.update(req.body, { where: { usuario: usuario, numero: numero } }).then(num => {
+    //Validar
+    const errors = await validateTfn(telefono);
+
+    if (errors != null) {
+        res.status(400).send(errors);
+        return;
+        //
+    }
+
+    const condition = (req.body.empresa == undefined || req.body.empresa == null)?{ telefono: numero, usuario: req.body.usuario}:{ telefono: numero, empresa: req.body.empresa};
+
+    telefonos.update(telefono, {
+         where: condition 
+        }).then(num => {
             if (num == 1) {
-                res.send({
+                res.status(200).send({
                     message: "El teléfono ha sido modificado exitosamente."
                 });
             } else {
@@ -121,21 +134,24 @@ async function validateTfn(telefono) {
                 break;
             case "usuario":
 
-                //Validar si existe el usuario
-                if (await Usuarios.findByPk(telefono[key]) == null)
-                    errors[key].none = "El usuario no existe.";
-
+                if(telefono[key]!= null){
+                    //Validar si existe el usuario
+                    if (await Usuarios.findByPk(telefono[key]) == null)
+                        errors[key].none = "El usuario no existe.";
+                }
                 break;
 
             case "empresa":
 
-                //Validar si existe la empresa
-                if (await Empresas.findByPk(telefono[key]) == null)
-                    errors[key].none = "La empresa no existe.";
-
+                if(telefono[key]!=null){
+                    //Validar si existe la empresa
+                    if (await Empresas.findByPk(telefono[key]) == null)
+                        errors[key].none = "La empresa no existe.";
+                }                    
                 break;
 
             default:
+                delete telefono[key];
                 break;
         }
         if (validation.empty(telefono["empresa"]) != null && validation.empty(telefono["usuario"]) != null) {

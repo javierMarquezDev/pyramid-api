@@ -53,9 +53,11 @@ exports.usuario = (req, res) => {
 exports.update = async(req, res) => {
     const codigo = req.params.id;
     const autor = req.params.autor;
+    req.body.codigo = codigo;
+    req.body.autor = autor;
 
     //Validar
-    const errors = await validateEncuesta(encuesta);
+    const errors = await validateEncuesta(req.body);
 
     if (errors != null) {
         res.status(400).send(errors);
@@ -115,10 +117,6 @@ async function validateEncuesta(encuesta) {
         (errors[key] == null) ? errors[key] = {}: false;
 
         switch (key) {
-            case "codigo":
-                var duplicate = await Encuestas.findByPk(encuesta.codigo);
-                (duplicate == null) ? false: errors[key].unique = "El dato debe ser único";
-                break;
             case "autor":
                 errors[key].empty = validation.empty(encuesta[key]);
 
@@ -136,6 +134,7 @@ async function validateEncuesta(encuesta) {
                 errors[key].xtsn = validation.maxtsn(encuesta[key], 200);
                 break;
             default:
+                delete encuesta[key]
                 break;
         }
     }

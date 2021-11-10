@@ -132,6 +132,7 @@ async function validateRol(rol) {
                 errors[key].xtsn = validation.maxtsn(rol[key], 200);
                 break;
             default:
+                delete rol[key];
                 break;
         }
     }

@@ -1,6 +1,7 @@
 const db = require("../models");
 const Usuarios = db.usuarios;
 const validation = require("../validation/validation");
+const Rolusuarios = db.rolusuarios;
 
 // Crear
 exports.create = async(req, res) => {
@@ -17,13 +18,16 @@ exports.create = async(req, res) => {
 
     //BD
     Usuarios.create(usuario).then(data => {
+        Rolusuarios.create({usuario:usuario.email,rol:2}).then(data =>{
             res.status(201).send({
-                message: "Usuario creado con éxito."
+                message: "Usuario y rol asignados con éxito."
             });
+        })
+            
         })
         .catch(err => {
             res.status(500).send({
-                message: err.message || "Error creando el Usuario."
+                message: "Error creando el Usuario."
             });
         });
 
@@ -113,24 +117,56 @@ exports.deleteOne = (req, res) => {
         })
 }
 
+//Obtener notificaciones
+exports.getNotification = async(req,res) => {
+    Usuarios.findByPk(req.params.id).then(data => { 
+        var notificacion;
+
+        notificacionArray = Array.from(data.dataValues.notificaciones);
+
+        notificacionArray.forEach(element => {
+            if(element.codigo == req.params.notificacion){
+                notificacion = element;
+            }
+                
+        });
+
+        res.status(200).json(notificacion)
+    });
+}
+
+//Obtener notificaciones
+exports.getOneNotification = async(req,res) => {
+    Usuarios.findByPk(req.params.id).then(data => { res.status(200).json(data.dataValues.notificaciones)});
+}
+
 //Añadir notificaciones
 exports.addNotification = async(req, res) => {
     const id = req.params.id;
     const notificacion = req.body;
 
-    console.log(req.body);
+    console.log(notificacion);
 
-    var notificaciones = await Usuarios.findByPk(id).then(data => { return data.dataValues.notificaciones });
+    await Usuarios.findByPk(id).then(data => { 
+        notificaciones = data.dataValues.notificaciones;
 
-    notificacionArray = Array.from(notificaciones);
+        notificacionArray = Array.from(notificaciones);
 
-    notificacion["codigo"] = notificacionArray[notificacionArray.length - 1].codigo + 1;
+        switch (notificacionArray.length){
+            case 0:
+                notificacion.codigo = 1;
+                break;
+            default:
+                notificacion.codigo = notificacionArray[notificacionArray.length - 1].codigo + 1;
+                break;
+        }
+        
 
-    notificacionArray.push(notificacion);
+        notificacionArray.push(notificacion);
 
-    const body = { "notificaciones": notificacionArray };
+        const body = { "notificaciones": notificacionArray };
 
-    Usuarios.update(
+        Usuarios.update(
             body, {
                 where: { email: id }
             }).then(num => {
@@ -150,12 +186,18 @@ exports.addNotification = async(req, res) => {
                 message: "Error modificando la notificación con dirección de correo. " + err
             });
         });
+    
+    });
+
+    
+
+    
 }
 
 //Eliminar notificaciones
 exports.removeNotification = async(req, res) => {
     const id = req.params.id;
-    const notificacion = req.body.codigo;
+    const notificacion = req.params.notificacion;
 
     var notificaciones = await Usuarios.findByPk(id).then(data => { return data.dataValues.notificaciones });
 
@@ -249,6 +291,7 @@ async function validateUsuario(usuario) {
                 break;
 
             default:
+                delete usuario[key];
                 break;
         }
     }

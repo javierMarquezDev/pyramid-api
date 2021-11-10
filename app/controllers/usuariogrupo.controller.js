@@ -72,6 +72,10 @@ exports.update = async(req, res) => {
     const codigo = req.params.codigo;
     const empresa = req.params.empresa;
 
+    usuariogrupo.usuario = usuario;
+    usuariogrupo.codigo = codigo;
+    usuariogrupo.empresa = empresa;
+
     //Validar
     const errors = await validateUsuariogrupo(usuariogrupo);
 
@@ -162,6 +166,7 @@ async function validateUsuariogrupo(usuariogrupo) {
                 }
                 break;
             default:
+                delete usuariogrupo[key];
                 break;
         }
 

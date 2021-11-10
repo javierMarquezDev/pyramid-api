@@ -58,6 +58,11 @@ exports.update = async(req, res) => {
     const encuestacodigo = req.params.encuestacodigo;
     const encuestaautor = req.params.encuestaautor;
 
+    var pregunta = req.body;
+    pregunta.codigo = codigo;
+    pregunta.encuestacodigo = encuestacodigo;
+    pregunta.encuestaautor = encuestaautor;
+
     //Validar
     const errors = await validatePregunta(pregunta);
 
@@ -120,12 +125,6 @@ async function validatePregunta(pregunta) {
         (errors[key] == null) ? errors[key] = {}: false;
 
         switch (key) {
-            case "codigo":
-                errors[key].empty = validation.empty(pregunta[key]);
-                if (validation.number(pregunta[key]) == undefined) {
-                    errors[key].valid = "Tipo no válido.";
-                }
-
             case "encuestacodigo":
             case "encuestaautor":
                 errors[key].empty = validation.empty(pregunta[key]);
@@ -147,6 +146,7 @@ async function validatePregunta(pregunta) {
                 try { JSON.parse(pregunta[key]); } catch (e) { errors[key].valid = "No tiene un formato válido"; }
                 break;
             default:
+                delete pregunta[key];
                 break;
         }
     }

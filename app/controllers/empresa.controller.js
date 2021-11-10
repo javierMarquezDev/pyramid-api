@@ -43,10 +43,10 @@ exports.findOne = (req, res) => {
 };
 
 // Modificar
-exports.update = (req, res) => {
+exports.update = async (req, res) => {
 
     //Validar
-    const errors = validateEmpresa(req.body);
+    const errors = await validateEmpresa(req.body);
 
     if (errors != null) {
         res.status(400).send(errors);
@@ -154,6 +154,7 @@ async function validateEmpresa(empresa) {
                 errors[key].valid = validation.regex(empresa[key], /^\w*?(º|ª)?\w*?$/);
                 break;
             default:
+                delete empresa[key];
                 break;
         }
     }

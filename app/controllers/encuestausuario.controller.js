@@ -25,7 +25,7 @@ exports.create = async(req, res) => {
         })
         .catch(err => {
             res.status(500).send({
-                message: err.message || "Error creando el encuestausuario."
+                message: "Error creando el encuestausuario."
             });
         });
 
@@ -84,7 +84,7 @@ exports.encuestado = (req, res) => {
 };
 
 // Mostrar según encuesta
-exports.proyecto = (req, res) => {
+exports.encuesta = (req, res) => {
     const encuestacodigo = req.params.encuestacodigo;
     const encuestaautor = req.params.encuestaautor;
 
@@ -186,7 +186,7 @@ async function validateEncuestausuario(encuestausuario) {
             case "encuestaautor":
                 errors[key].empty = validation.empty(encuestausuario[key]);
 
-                //Validar si existe el proyecto
+                //Validar si existe la encuesta
                 if (validation.number(encuestausuario["encuestacodigo"]) == undefined) {
                     if (await encuestas.findOne({ where: { codigo: encuestausuario["encuestacodigo"], autor: encuestausuario["encuestaautor"] } }) == null)
                         errors[key].none = "La encuesta asociada no existe";
@@ -195,10 +195,14 @@ async function validateEncuestausuario(encuestausuario) {
                 }
                 break;
             default:
+                delete encuestausuario[key];
                 break;
         }
 
     }
+
+    if(encuestausuarios.findOne({where:{encuestaautor:encuestausuario.encuestaautor,encuestacodigo:encuestausuario.encuestacodigo,encuestado:encuestausuario.encuestado}}) != null)
+        errors.encuestado.duplicate = "Registro duplicado";
 
     for (var key in errors) {
         if (JSON.stringify(errors[key]) != "{}") {

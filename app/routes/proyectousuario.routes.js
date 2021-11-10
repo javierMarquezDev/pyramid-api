@@ -22,7 +22,7 @@ module.exports = app => {
     router.put("/:usuario/:proyectoadministrador/:proyectocodigo", proyectousuarios.update);
 
     // Delete a proyectousuario
-    router.delete("/:id", proyectousuarios.deleteOne);
+    router.delete("/:usuario/:proyectoadministrador/:proyectocodigo", proyectousuarios.deleteOne);
 
     app.use('/api/proyectousuarios', router);
 

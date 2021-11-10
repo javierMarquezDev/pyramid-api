@@ -186,6 +186,7 @@ async function validateTarea(tarea) {
                 }
                 break;
             default:
+                delete tarea[key];
                 break;
         }
 

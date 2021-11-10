@@ -1,4 +1,5 @@
 const db = require("../models");
+const usuariotarea = require("../models/usuariotarea");
 //const tarea = require("../models/tarea");
 const usuariotareas = db.usuariotareas;
 const tareas = db.tareas;
@@ -87,6 +88,10 @@ exports.update = async(req, res) => {
     const tareaadministradorproyecto = req.params.tareaadministradorproyecto;
     const tareacodigoproyecto = req.params.tareacodigoproyecto;
     const tareacodigo = req.params.tareacodigo;
+    var usuariotarea = req.body;
+    usuariotarea.tareaadministradorproyecto = tareaadministradorproyecto;
+    usuariotarea.tareacodigoproyecto = tareacodigoproyecto;
+    usuariotarea.tareacodigo = tareacodigo;
 
     //Validar
     const errors = await validateUsuariotarea(usuariotarea);
@@ -96,7 +101,7 @@ exports.update = async(req, res) => {
         return;
     }
 
-    usuariotareas.update(req.body, {
+    usuariotareas.update(usuariotarea, {
             where: {
                 atareado: atareado,
                 tareaadministradorproyecto: tareaadministradorproyecto,
@@ -185,6 +190,7 @@ async function validateUsuariotarea(usuariotarea) {
                 }
                 break;
             default:
+                delete usuariotarea[key];
                 break;
         }
 
