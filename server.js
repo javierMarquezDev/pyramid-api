@@ -1,6 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const key = require("./app/config/security.config").key;
 
 const app = express();
 
@@ -45,10 +47,25 @@ require("./app/routes/tarea.routes")(app);
 require("./app/routes/telefono.routes")(app);
 require("./app/routes/usuariogrupo.routes")(app);
 require("./app/routes/usuariotarea.routes")(app);
+require("./app/routes/login.routes")(app);
 
+// return jwt
+exports.resJWT = () =>{
+    const payload = {check:true};
+    const token = jwt.sign(payload,key,{expiresIn:1440});
+    return token;
+}
+
+// verify jwt
+exports.verifyJWT = (token,response) =>{
+
+    return jwt.verify(token,key,response);
+
+}
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`);
 });
+

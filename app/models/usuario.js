@@ -77,6 +77,9 @@ module.exports = function(sequelize, Sequelize) {
     Usuario.generateHash = function(value) {
         return bcrypt.hashSync(value, bcrypt.genSaltSync(10), null)
     }
+    Usuario.decrypt = function(value,encrypted) {
+        return bcrypt.compareSync(value,encrypted);
+    }
 
     return Usuario;
 };
