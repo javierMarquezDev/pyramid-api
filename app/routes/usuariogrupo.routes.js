@@ -3,26 +3,28 @@ module.exports = app => {
 
     var router = require("express").Router();
 
+    const auth = require("../middlewares/middleware.security");
+
     // Retrieve all usuariogrupos
-    router.get("/", usuariogrupos.findAll);
+    router.get("/",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => { usuariogrupos.findAll(req,res)});
 
     // Retrieve all usuariogrupos by grupo
-    router.get("/:codigo/:empresa", usuariogrupos.grupo);
+    router.get("/:codigo/:empresa",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuariogrupos.grupo(req,res)} );
 
     // Retrieve all usuariogrupos by usuario
-    router.get("/:usuario", usuariogrupos.usuario);
+    router.get("/:usuario",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuariogrupos.usuario(req,res)} );
 
     // Retrieve one usuariogrupo
-    router.get("/:usuario/:codigo/:empresa", usuariogrupos.findOne);
+    router.get("/:usuario/:codigo/:empresa",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuariogrupos.findOne(req,res)} );
 
     // Create one usuariogrupo
-    router.post("/", usuariogrupos.create)
+    router.post("/",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuariogrupos.create(req,res)} );
 
     // Update a usuariogrupo
-    router.put("/:usuario/:codigo/:empresa", usuariogrupos.update);
+    router.put("/:usuario/:codigo/:empresa",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuariogrupos.update(req,res)} );
 
     // Delete a usuariogrupo
-    router.delete("/:usuario/:codigo/:empresa", usuariogrupos.deleteOne);
+    router.delete("/:usuario/:codigo/:empresa",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuariogrupos.deleteOne(req,res)} );
 
     app.use('/api/usuariogrupos', router);
 

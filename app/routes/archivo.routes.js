@@ -3,20 +3,22 @@ module.exports = app => {
 
     var router = require("express").Router();
 
+    const auth = require("../middlewares/middleware.security");
+
     // Retrieve all archivos
-    router.get("/", archivos.findAll);
+    router.get("/",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {archivos.findAll(req,res)} );
 
     // Retrieve one archivo
-    router.get("/:id", archivos.findOne);
+    router.get("/:id",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {archivos.findOne(req,res)} );
 
     // Create one archivo
-    router.post("/", archivos.create)
+    router.post("/",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {archivos.create(req,res)} );
 
     // Update a archivo
-    router.put("/:id", archivos.update);
+    router.put("/:id",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {archivos.update(req,res)} );
 
     // Delete a archivo
-    router.delete("/:id", archivos.deleteOne);
+    router.delete("/:id",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => { archivos.deleteOne(req,res)});
 
     app.use('/api/archivos', router);
 

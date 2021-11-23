@@ -3,24 +3,26 @@ module.exports = app => {
 
     var router = require("express").Router();
 
+    const auth = require("../middlewares/middleware.security");
+
     // Retrieve all empresas
-    router.get("/", empresas.findAll);
+    router.get("/",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresas.findAll(req,res)} );
 
     // Create one empresa
-    router.post("/", empresas.create)
+    router.post("/",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresas.create(req,res)} );
 
     // Retrieve one empresa
-    router.get("/:id", empresas.findOne)
+    router.get("/:id",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresas.findOne(req,res)} );
 
     // Retrieve one empresa by nombre
-    router.get("/name/:nombre", empresas.name)
+    router.get("/name/:nombre",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresas.name(req,res)} );
 
     // Update a Empresa
-    router.put("/:id", empresas.update);
+    router.put("/:id",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresas.update(req,res)} );
 
     // Delete a Empresa
-    router.delete("/:id", empresas.deleteOne);
+    router.delete("/:id",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresas.deleteOne(req,res)} );
 
-    app.use('/api/empresas', router);
+    app.use('/api/empresas',  (req,res,next)=>{auth.auth(req,res,next)}, router);
 
 }
