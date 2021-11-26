@@ -12,8 +12,11 @@ module.exports = app => {
     // Retrieve all grupos
     //router.get("/", grupos.findAll);
 
+    //Retrieve grupos from one usuario
+    router.get("/usuario/search/:user", (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {grupos.usuario(req,res)} );
+
     //Asociar usuario a grupo
-    router.post("/:empresa/:id",  (req,res,next)=>{auth.auth(req,res,next)}, usuariogrupos.create);
+    router.post("/:empresa/:id",  (req,res,next)=>{auth.auth(req,res,next)},  (req,res) => {usuariogrupos.create(req,res)} );
 
     // Retrieve one grupo
     router.get("/:empresa/:id",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {grupos.findOne(req,res)} );

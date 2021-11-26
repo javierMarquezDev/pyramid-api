@@ -48,6 +48,7 @@ require("./app/routes/telefono.routes")(app);
 require("./app/routes/usuariogrupo.routes")(app);
 require("./app/routes/usuariotarea.routes")(app);
 require("./app/routes/login.routes")(app);
+require("./app/routes/logout.routes")(app);
 
 // return jwt
 exports.resJWT = () =>{

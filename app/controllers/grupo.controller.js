@@ -1,5 +1,6 @@
 const db = require("../models");
 const grupo = require("../models/grupo");
+const usuariogrupos = db.usuariogrupos;
 const grupos = db.grupos;
 const validation = require("../validation/validation");
 const Empresas = db.empresas;
@@ -43,6 +44,31 @@ exports.findOne = (req, res) => {
 exports.empresa = (req, res) => {
     grupos.findAll({ where: { empresa: req.params.empresa } }).then(data => { res.json(data) });
 };
+
+//Mostrar grupos según usuario
+exports.usuario = async (req,res) => {
+    const user = req.params.user;
+    usuariogrupos.findAll({where:{usuario: user}}).then( async data =>{
+
+        var grupoSet = [];
+        const dataArray = Array.from(data);
+
+        for(var i = 0; i<data.length; i++){
+        
+            value = await grupos.findAll({where:{codigo: parseInt(dataArray[i].dataValues.codigogrupo) ,empresa: dataArray[i].dataValues.empresagrupo }}).then(
+                data => {
+                    return data[0].dataValues;
+                }
+            )
+
+            grupoSet.push(await value);
+        };
+
+        res.status(200).json(grupoSet);
+    })
+}
+
+//Mostrar grupos según empresa y usuario
 
 // Modificar
 exports.update = async(req, res) => {

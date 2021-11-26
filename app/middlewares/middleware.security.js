@@ -9,14 +9,14 @@ exports.auth = authRequired.use((req, res, next) => {
     if (token) {
         server.verifyJWT(token,(err, decoded) => {      
             if (err) {
-              return res.json({ message: 'Acceso denegado.' });    
+              return res.status(403).json({ message: 'Acceso denegado.' });    
             } else {
               req.decoded = decoded;    
               next();
             }
           });
     } else {
-      res.send({ 
+      res.status(403).send({ 
           mensaje: 'Credenciales insuficientes.' 
       });
     }
