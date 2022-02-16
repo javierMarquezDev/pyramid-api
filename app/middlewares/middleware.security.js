@@ -4,7 +4,11 @@ const   express = require("express"),
 const authRequired = express.Router();
 
 exports.auth = authRequired.use((req, res, next) => {
-    const token = req.headers['access-token'];
+
+    /**@todo QUITAR ESTO EN PROD */
+    next()
+
+    /*const token = req.headers['access-token'];
  
     if (token) {
         server.verifyJWT(token,(err, decoded) => {      
@@ -19,6 +23,6 @@ exports.auth = authRequired.use((req, res, next) => {
       res.status(403).send({ 
           mensaje: 'Credenciales insuficientes.' 
       });
-    }
+    }*/
  });
 

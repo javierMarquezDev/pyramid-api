@@ -17,6 +17,9 @@ module.exports = app => {
     // Retrieve one empresa by nombre
     router.get("/name/:nombre",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresas.name(req,res)} );
 
+    // Retrieve one empresa by admin
+    router.get("/admin/:admin",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresas.admin(req,res)} );
+
     // Update a Empresa
     router.put("/:id",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresas.update(req,res)} );
 

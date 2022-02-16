@@ -16,22 +16,22 @@ module.exports = function(sequelize, Sequelize) {
                 key: 'codigoproyecto'
             }
         },
-        tareacodigoproyecto: {
+        tareagrupocodigo: {
             type: Sequelize.INTEGER,
             allowNull: false,
             primaryKey: true,
             references: {
                 model: 'tarea',
-                key: 'codigoproyecto'
+                key: 'grupocodigo'
             }
         },
-        tareaadministradorproyecto: {
-            type: Sequelize.STRING(30),
+        tareagrupoempresa: {
+            type: Sequelize.STRING(9),
             allowNull: false,
             primaryKey: true,
             references: {
                 model: 'tarea',
-                key: 'codigoproyecto'
+                key: 'grupoempresa'
             }
         },
         archivo: {

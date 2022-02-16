@@ -1,3 +1,5 @@
+const { json } = require('body-parser');
+const Logger = require('../log/logger');
 const db = require("../models");
 const Usuarios = db.usuarios;
 const validation = require("../validation/validation");
@@ -16,18 +18,18 @@ exports.create = async(req, res) => {
 
     const usuario = req.body;
 
+    Logger.log(usuario);
+
     //BD
     Usuarios.create(usuario).then(data => {
-        Rolusuarios.create({usuario:usuario.email,rol:2}).then(data =>{
-            res.status(201).send({
-                message: "Usuario y rol asignados con éxito."
-            });
-        })
-            
+        res.status(201).send({
+            message: "Usuario creado con éxito."
+        });    
         })
         .catch(err => {
             res.status(500).send({
-                message: "Error creando el Usuario."
+                message: "Error creando el Usuario.",
+                error: err
             });
         });
 
@@ -81,8 +83,7 @@ exports.update = async(req, res) => {
                 });
             } else {
                 res.send({
-                    message: `No es posible modificar el usuario con dirección de correo ${id}.` +
-                        `Compruebe la dirección o el cuerpo de la request.`
+                    message: `No es posible modificar el usuario con dirección de correo ${id}.`
                 });
             }
         })
@@ -247,11 +248,22 @@ async function validateUsuario(usuario) {
                 errors.email.xtsn = validation.maxtsn(usuario[key], 50);
                 errors.email.format = validation.email(usuario[key]);
                 var duplicateEmail = await Usuarios.findByPk(usuario.email);
-                (duplicateEmail == null) ? false: errors.email.unique = "El email debe ser único";
+                (duplicateEmail == null) ? false: errors.email.unique = "El email ya existe.";
                 break;
             case "contrasena":
                 errors[key].empty = validation.empty(usuario[key]);
+
+                const usuarioBd = await Usuarios.findOne({where: {dni:usuario.dni}}).then(data =>data);
+
+
+                Logger.log(usuarioBd);
+                if(usuarioBd != null && usuarioBd.contrasena === usuario.contrasena){
+                    usuario.contrasena = undefined;
+                    break;
+                }
+
                 errors[key].xtsn = validation.maxtsn(usuario[key], 30);
+
                 if (errors[key].empty == undefined && errors[key].xtsn == undefined) {
                     usuario[key] = Usuarios.generateHash(usuario[key]);
                 }
@@ -266,9 +278,16 @@ async function validateUsuario(usuario) {
             case "dni":
                 errors.dni.empty = validation.empty(usuario[key]);
                 errors.dni.valid = validation.dni(usuario[key]);
-                var duplicateDni = await Usuarios.findOne({ where: { dni: usuario.dni } });
-                (duplicateDni == null) ? false: errors.dni.unique = "El dni debe ser único";
+
+                var duplicateDni = await Usuarios.findAll({ where: { dni: usuario[key] } }).then((data)=>data);
+
+                if(duplicateDni.length != undefined && duplicateDni.length >= 2){
+                    errors.dni.unique = "El dni ya existe.";
+                    break;
+                }
+
                 break;
+                
             case "tipovia":
                 errors.tipovia.empty = validation.empty(usuario[key]);
                 errors.tipovia.valid = validation.tipovia(usuario[key]);
@@ -287,8 +306,12 @@ async function validateUsuario(usuario) {
                 errors[key].valid = validation.regex(usuario[key], /^\w*?(º|ª)?\w*?$/);
                 break;
             case "notificaciones":
-                errors[key].valid = validation.jsobject(usuario[key]);
-                break;
+                if(usuario[key] != undefined){
+                    errors[key].valid = validation.jsobject(usuario[key]);
+                    break;
+                }else{
+                    usuario[key] = {};
+                }                
 
             default:
                 delete usuario[key];
@@ -296,12 +319,20 @@ async function validateUsuario(usuario) {
         }
     }
 
+    let empties = [];
+
     for (var key in errors) {
         if (JSON.stringify(errors[key]) != "{}") {
             empty = false;
-            break;
+        }else{
+            empties.push(key);
         }
     }
+
+    empties.forEach(element => {
+        delete errors[element];
+        
+    });
 
     (empty) ? errors = null: false;
     return errors;

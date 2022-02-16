@@ -15,6 +15,12 @@ module.exports = app => {
     //Retrieve grupos from one usuario
     router.get("/usuario/search/:user", (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {grupos.usuario(req,res)} );
 
+    //Retrieve grupos from one admin
+    router.get("/admin/search/:admin", (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {grupos.admin(req,res)} );
+
+    //Retrieve grupos from fin
+    router.get("/finalizado/search/:fin", (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {grupos.fin(req,res)} );
+
     //Asociar usuario a grupo
     router.post("/:empresa/:id",  (req,res,next)=>{auth.auth(req,res,next)},  (req,res) => {usuariogrupos.create(req,res)} );
 

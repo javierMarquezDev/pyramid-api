@@ -35,7 +35,18 @@ exports.findAll = (req, res) => {
 
 // Mostrar según PK
 exports.findOne = (req, res) => {
-    Archivos.findByPk(req.params.id).then(data => { res.status(200).json(data) });
+    Archivos.findOne({where: {codigo: req.params.codigo,
+    tareacodigo: req.params.tareacodigo,
+    tareagrupocodigo: req.params.tareagrupocodigo,
+    tareagrupoempresa: req.params.tareagrupoempresa}}).then(data => { res.status(200).json(data) });
+};
+
+// Mostrar según tarea
+exports.findByTarea = (req, res) => {
+    Archivos.findOne({where: {
+    tareacodigo: req.params.tareacodigo,
+    tareagrupocodigo: req.params.tareagrupocodigo,
+    tareagrupoempresa: req.params.tareagrupoempresa}}).then(data => { res.status(200).json(data) });
 };
 
 // Modificar
@@ -52,9 +63,10 @@ exports.update = async(req, res) => {
         return;
     }
 
-    Archivos.update(req.body, {
-            where: { nif: id }
-        }).then(num => {
+    Archivos.update(req.body, {where: {codigo: req.params.codigo,
+        tareacodigo: req.params.tareacodigo,
+        tareagrupocodigo: req.params.tareagrupocodigo,
+        tareagrupoempresa: req.params.tareagrupoempresa}}).then(num => {
             if (num == 1) {
                 res.send({
                     message: "La archivo ha sido modificado exitosamente."
@@ -76,9 +88,10 @@ exports.update = async(req, res) => {
 exports.deleteOne = (req, res) => {
     const id = req.params.id;
 
-    Archivos.destroy({
-            where: { nif: id }
-        }).then(num => {
+    Archivos.destroy({where: {codigo: req.params.codigo,
+        tareacodigo: req.params.tareacodigo,
+        tareagrupocodigo: req.params.tareagrupocodigo,
+        tareagrupoempresa: req.params.tareagrupoempresa}}).then(num => {
             if (num == 1) {
                 res.send({
                     message: "El archivo fue eliminado con éxito."
@@ -107,17 +120,17 @@ async function validateArchivo(archivo) {
 
         switch (key) {
             case "tareacodigo":
-            case "tareacodigoproyecto":
+            case "tareagrupocodigo":
 
                 //Validar si existe tarea
                 if (Tareas.findOne({
                         where: {
                             codigo: archivo["tareacodigo"],
-                            codigoproyecto: archivo["tareacodigoproyecto"],
-                            administradorproyecto: archivo["tareaadministradorproyecto"]
+                            grupocodigo: archivo["tareagrupocodigo"],
+                            grupoempresa: archivo["tareagrupoempresa"]
                         }
                     }) == null)
-                    errors[key].none = "La tarea asociada no existe o el código es incorrecto.";
+                    errors[key].none = "La tarea asociada no existe o la identificación es incorrecta.";
 
                 break;
             case "archivo":
@@ -141,12 +154,20 @@ async function validateArchivo(archivo) {
         }
     }
 
+    let empties = [];
+
     for (var key in errors) {
         if (JSON.stringify(errors[key]) != "{}") {
             empty = false;
-            break;
+        }else{
+            empties.push(key);
         }
     }
+
+    empties.forEach(element => {
+        delete errors[element];
+        
+    });
 
     (empty) ? errors = null: false;
     return errors;

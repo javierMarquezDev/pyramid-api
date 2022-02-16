@@ -191,12 +191,20 @@ async function validateMensaje(mensaje) {
         }
     }
 
+    let empties = [];
+
     for (var key in errors) {
         if (JSON.stringify(errors[key]) != "{}") {
             empty = false;
-            break;
+        }else{
+            empties.push(key);
         }
     }
+
+    empties.forEach(element => {
+        delete errors[element];
+        
+    });
 
     (empty) ? errors = null: false;
     return errors;

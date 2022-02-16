@@ -27,11 +27,6 @@ module.exports = function(sequelize, Sequelize) {
                 model: 'grupo',
                 key: 'empresa'
             }
-        },
-        administrador: {
-            type: Sequelize.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
         }
     }, {
         sequelize,

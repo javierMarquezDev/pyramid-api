@@ -6,14 +6,15 @@ const key = require("./app/config/security.config").key;
 
 const app = express();
 
+app.use(cors());
+
 const db = require("./app/models");
 db.sequelize.sync();
 
 var corsOptions = {
-    origin: "http://localhost:3000"
+    origin: "http://localhost"
 };
 
-app.use(cors(corsOptions));
 
 // parse requests of content-type - application/json
 app.use(bodyParser.json());

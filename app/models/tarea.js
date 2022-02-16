@@ -7,22 +7,22 @@ module.exports = function(sequelize, Sequelize) {
             allowNull: false,
             primaryKey: true
         },
-        codigoproyecto: {
+        grupocodigo: {
             type: Sequelize.INTEGER,
             allowNull: false,
             primaryKey: true,
             references: {
-                model: 'proyecto',
+                model: 'grupo',
                 key: 'codigo'
             }
         },
-        administradorproyecto: {
-            type: Sequelize.STRING(30),
+        empresacodigo: {
+            type: Sequelize.STRING(9),
             allowNull: false,
             primaryKey: true,
             references: {
-                model: 'proyecto',
-                key: 'codigo'
+                model: 'grupo',
+                key: 'empresa'
             }
         },
         nombre: {

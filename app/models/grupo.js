@@ -16,6 +16,14 @@ module.exports = function(sequelize, Sequelize) {
                 key: 'nif'
             }
         },
+        administrador: {
+            type: Sequelize.STRING(30),
+            allowNull: false,
+            references: {
+                model: 'usuario',
+                key: 'email'
+            }
+        },
         nombre: {
             type: Sequelize.STRING(30),
             allowNull: false
@@ -24,21 +32,14 @@ module.exports = function(sequelize, Sequelize) {
             type: Sequelize.STRING(200),
             allowNull: true
         },
-        codigosub: {
-            type: Sequelize.INTEGER,
-            allowNull: true,
-            references: {
-                model: 'grupo',
-                key: 'empresa'
-            }
+        fechahora: {
+            type: Sequelize.DATE,
+            allowNull: true
         },
-        empresasub: {
-            type: Sequelize.STRING(9),
-            allowNull: true,
-            references: {
-                model: 'grupo',
-                key: 'empresa'
-            }
+        finalizado: {
+            type: Sequelize.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         }
     }, {
         sequelize,

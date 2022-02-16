@@ -1,0 +1,26 @@
+null
+{
+  email: 'higo@gmail.com',
+  dni: '34022039W',
+  contrasena: '$2b$10$wzvUx6JJFdwoFSi9NGGlCelO2TEnkCFxRdc/pLeVM4YBmL0hZjNee',
+  nombre: 'Rodrigo',
+  apellido1: 'Díaz',
+  apellido2: 'de Vivar',
+  tipovia: 'C./',
+  nombrevia: 'Hernani',
+  numvia: '47',
+  notificaciones: {}
+}
+null
+{
+  email: 'higo@gmail.com',
+  dni: '34022039W',
+  contrasena: '$2b$10$RyqU4uPNq0kYf.CeKJizbORuhS8N0E8HdVwu7DOE18vfw0raU4fXm',
+  nombre: 'Rodrigo',
+  apellido1: 'Díaz',
+  apellido2: 'de Vivar',
+  tipovia: 'C./',
+  nombrevia: 'Hernani',
+  numvia: '47',
+  notificaciones: {}
+}

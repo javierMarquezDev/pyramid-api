@@ -1,8 +1,11 @@
+const myLogger = require("../log/logger");
+
 const rsocialsiglas = require("../models/razonsocial.enum").razonsocial;
 
 //VALIDACIÓN DE CAMPO O CADENA VACÍA
 exports.empty = (fieldValue) => {
-    if (fieldValue === "" || fieldValue === null) {
+    if (fieldValue === "" || fieldValue === null || fieldValue === "null") {
+        myLogger.log(fieldValue);
         return `El campo no puede estar vacío.`;
     }
 }
@@ -99,14 +102,14 @@ exports.cif = (fieldValue) => {
 
 //STRING MAX EXTENSION
 exports.maxtsn = (fieldValue, extension) => {
-    if (fieldValue == undefined || fieldValue.length > extension) {
+    if (fieldValue != undefined && fieldValue.length > extension) {
         return `El campo es demasiado largo.`
     }
 }
 
 //STRING MIN EXTENSION
 exports.mnxtsn = (fieldValue, extension) => {
-    if (fieldValue.length < extension) {
+    if (fieldValue != undefined && fieldValue.length < extension) {
         return `El campo es demasiado corto.`
     }
 }

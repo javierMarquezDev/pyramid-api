@@ -4,6 +4,7 @@ const usuariogrupos = db.usuariogrupos;
 const grupos = db.grupos;
 const validation = require("../validation/validation");
 const Empresas = db.empresas;
+const Usuarios = db.usuarios;
 
 //Crear grupo
 exports.create = async(req, res) => {
@@ -43,6 +44,16 @@ exports.findOne = (req, res) => {
 // Mostrar grupos según empresa
 exports.empresa = (req, res) => {
     grupos.findAll({ where: { empresa: req.params.empresa } }).then(data => { res.json(data) });
+};
+
+// Mostrar grupos según admin
+exports.admin = (req, res) => {
+    grupos.findAll({ where: { administrador: req.params.admin } }).then(data => { res.json(data) });
+};
+
+// Mostrar grupos segun finalizacion
+exports.fin = (req, res) => {
+    grupos.findAll({ where: { finalizado: req.params.fin } }).then(data => { res.json(data) });
 };
 
 //Mostrar grupos según usuario
@@ -163,17 +174,28 @@ async function validateGrupo(grupo) {
                 errors[key].empty = validation.empty(grupo[key]);
                 errors[key].xtsn = validation.maxtsn(grupo[key], 200);
                 break;
-            case "codigosub":
-            case "empresasub":
+            case "administrador":
+                errors[key].empty = validation.empty(grupo[key]);
 
-                //Validar si existe subgrupo
-                if (await grupos.findOne({
-                        where: {
-                            codigo: grupo["codigosub"],
-                            empresasub: grupo["empresasub"]
-                        }
-                    }) == null)
-                    errors[key].none = "El subgrupo no existe o el código es incorrecto.";
+                //Validar si existe la empresa
+                if (await Usuarios.findByPk(grupo[key]) == null)
+                    errors[key].none = "El usuario administrador no existe";
+                break;
+            case "fechahora":
+
+                //2021-09-04T00:00:00.000+02:00
+
+                if (isNaN(Date.parse(proyecto[key]))) {
+                    errors[key].format = "No es una fecha válida."
+                } else {
+                    proyecto[key] = new Date(Date.parse(proyecto[key])).toISOString();
+                }
+
+                break;
+            case "finalizado":
+                if (typeof proyecto[key] != "boolean") {
+                    errors[key].type = "Tipo de dato no válido."
+                }
 
                 break;
             default:
@@ -182,12 +204,20 @@ async function validateGrupo(grupo) {
         }
     }
 
+    let empties = [];
+
     for (var key in errors) {
         if (JSON.stringify(errors[key]) != "{}") {
             empty = false;
-            break;
+        }else{
+            empties.push(key);
         }
     }
+
+    empties.forEach(element => {
+        delete errors[element];
+        
+    });
 
     (empty) ? errors = null: false;
     return errors;

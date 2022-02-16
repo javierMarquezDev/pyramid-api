@@ -1,3 +1,4 @@
+const { grupos } = require("../models");
 const db = require("../models");
 const tareas = db.tareas;
 const Op = db.Sequelize.Op;
@@ -10,8 +11,8 @@ exports.create = async(req, res) => {
 
     const tarea = req.body;
 
-    tarea.codigoproyecto = req.params.codigoproyecto;
-    tarea.administradorproyecto = req.params.administradorproyecto;
+    tarea.grupocodigo = req.params.grupocodigo;
+    tarea.grupoempresa = req.params.grupoempresa;
 
 
     //Validar
@@ -27,7 +28,7 @@ exports.create = async(req, res) => {
         })
         .catch(err => {
             res.status(500).send({
-                message: err.message || "Error creando el tarea."
+                message: err.message || "Error creando la tarea."
             });
         });
 
@@ -41,25 +42,25 @@ exports.findAll = (req, res) => {
 // Mostrar según PK
 exports.findOne = (req, res) => {
     const id = req.params.id;
-    const codigoproyecto = req.params.codigoproyecto;
-    const administradorproyecto = req.params.administradorproyecto;
+    const grupocodigo = req.params.grupocodigo;
+    const grupoempresa = req.params.grupoempresa;
     tareas.findOne({
         where: {
             codigo: id,
-            codigoproyecto: codigoproyecto,
-            administradorproyecto: administradorproyecto
+            grupocodigo: grupocodigo,
+            grupoempresa: grupoempresa
         }
     }).then(data => { res.status(200).json(data) });
 };
 
 // Mostrar según proyecto
 exports.proyecto = (req, res) => {
-    const codigoproyecto = req.params.codigoproyecto;
-    const administradorproyecto = req.params.administradorproyecto;
+    const grupocodigo = req.params.grupocodigo;
+    const grupoempresa = req.params.grupoempresa;
     tareas.findAll({
         where: {
-            codigoproyecto: codigoproyecto,
-            administradorproyecto: administradorproyecto
+            grupocodigo: grupocodigo,
+            grupoempresa: grupoempresa
         }
     }).then(data => { res.status(200).json(data) });
 };
@@ -69,13 +70,13 @@ exports.proyecto = (req, res) => {
 // Modificar
 exports.update = async(req, res) => {
     const id = req.params.id;
-    const codigoproyecto = req.params.codigoproyecto;
-    const administradorproyecto = req.params.administradorproyecto;
+    const grupocodigo = req.params.grupocodigo;
+    const grupoempresa = req.params.grupoempresa;
 
     const tarea = req.body;
 
-    tarea.codigoproyecto = codigoproyecto;
-    tarea.administradorproyecto = administradorproyecto;
+    tarea.grupocodigo = grupocodigo;
+    tarea.grupoempresa = grupoempresa;
 
     //Validar
     const errors = await validateTarea(tarea);
@@ -88,8 +89,8 @@ exports.update = async(req, res) => {
     tareas.update(req.body, {
             where: {
                 codigo: id,
-                codigoproyecto: codigoproyecto,
-                administradorproyecto: administradorproyecto
+                grupocodigo: grupocodigo,
+                grupoempresa: grupoempresa
             }
         }).then(num => {
             if (num == 1) {
@@ -112,14 +113,14 @@ exports.update = async(req, res) => {
 // Eliminar
 exports.deleteOne = (req, res) => {
     const id = req.params.id;
-    const codigoproyecto = req.params.codigoproyecto;
-    const administradorproyecto = req.params.administradorproyecto;
+    const grupocodigo = req.params.grupocodigo;
+    const grupoempresa = req.params.grupoempresa;
 
     tareas.destroy({
             where: {
                 codigo: id,
-                codigoproyecto: codigoproyecto,
-                administradorproyecto: administradorproyecto
+                grupocodigo: grupocodigo,
+                grupoempresa: grupoempresa
             }
         }).then(num => {
             if (num == 1) {
@@ -173,17 +174,27 @@ async function validateTarea(tarea) {
 
                 break;
 
-            case "codigoproyecto":
-            case "administradorproyecto":
+            case "grupocodigo":
+            case "grupoempresa":
                 errors[key].empty = validation.empty(tarea[key]);
 
                 //Validar si existe el proyecto
-                if (validation.number(tarea["codigoproyecto"]) == undefined) {
-                    if (await proyectos.findOne({ where: { codigo: tarea["codigoproyecto"], administrador: tarea["administradorproyecto"] } }) == null)
-                        errors[key].none = "El proyecto asociado no existe";
-                } else {
-                    errors["codigoproyecto"].format = "Tipo no válido.";
+                if(validation.cif(tarea["grupoempresa"]) == undefined){
+
+                    if (validation.number(tarea["grupocodigo"]) == undefined) {
+                        if (await grupos.findOne({ where: { codigo: tarea["grupocodigo"], empresa: tarea["grupoempresa"] } }) == null)
+                            errors[key].none = "El grupo asociado no existe";
+                    } else {
+                        
+                        errors["grupocodigo"].format = "Tipo no válido";
+                        
+                    }
+
+                }else{
+                    errors["grupoempresa"].format = "CIF no válido";
                 }
+
+                
                 break;
             default:
                 delete tarea[key];

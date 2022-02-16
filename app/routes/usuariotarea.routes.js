@@ -6,7 +6,7 @@ module.exports = app => {
     const auth = require("../middlewares/middleware.security");
 
     // Retrieve all usuariotareas
-    router.get("/",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuariotareas.findAll(req,res)} );
+    //router.get("/",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuariotareas.findAll(req,res)} );
 
     // Retrieve one
     router.get("/:tareaadministradorproyecto/:tareacodigoproyecto/:tareacodigo/:atareado",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuariotareas.findOne(req,res)} );
@@ -17,14 +17,14 @@ module.exports = app => {
     // Update a usuariotarea
     router.put("/:tareaadministradorproyecto/:tareacodigoproyecto/:tareacodigo/:atareado",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuariotareas.update(req,res)} );
 
+    // Delete a usuariotarea
+    router.delete("/:tareaadministradorproyecto/:tareacodigoproyecto/:tareacodigo/:atareado",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuariotareas.deleteOne(req,res)} );
+
     //Retrieve by usuario
     router.get("/:atareado",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuariotareas.usuario(req,res)} );
 
     //Retrieve by tarea
     router.get("/:tareaadministradorproyecto/:tareacodigoproyecto/:tareacodigo",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuariotareas.tarea(req,res)} );
-
-    // Delete a usuariotarea
-    router.delete("/:tareaadministradorproyecto/:tareacodigoproyecto/:tareacodigo/:atareado",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuariotareas.deleteOne(req,res)} );
 
     app.use('/api/usuariotareas', router);
 

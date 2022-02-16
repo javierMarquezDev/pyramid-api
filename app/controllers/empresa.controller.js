@@ -37,6 +37,11 @@ exports.name = (req, res) => {
     Empresas.findAll({ where: { nombre: req.params.nombre } }).then(data => { res.status(200).json(data) });
 };
 
+// Mostrar por admin
+exports.admin = (req, res) => {
+    Empresas.findAll({ where: { administrador: req.params.admin } }).then(data => { res.status(200).json(data) });
+};
+
 // Mostrar según PK
 exports.findOne = (req, res) => {
     Empresas.findByPk(req.params.id).then(data => { res.status(200).json(data) });
@@ -159,12 +164,20 @@ async function validateEmpresa(empresa) {
         }
     }
 
+    let empties = [];
+
     for (var key in errors) {
         if (JSON.stringify(errors[key]) != "{}") {
             empty = false;
-            break;
+        }else{
+            empties.push(key);
         }
     }
+
+    empties.forEach(element => {
+        delete errors[element];
+        
+    });
 
     (empty) ? errors = null: false;
     return errors;
