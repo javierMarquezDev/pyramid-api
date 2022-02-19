@@ -24,7 +24,9 @@ exports.create = async(req, res) => {
     }
 
     tareas.create(tarea).then(data => {
-            res.status(201).send(data);
+            res.status(201).send({
+                message: "Tarea creada con éxito."
+            });
         })
         .catch(err => {
             res.status(500).send({
@@ -61,6 +63,16 @@ exports.proyecto = (req, res) => {
         where: {
             grupocodigo: grupocodigo,
             grupoempresa: grupoempresa
+        }
+    }).then(data => { res.status(200).json(data) });
+};
+
+// Mostrar según usuario
+exports.usuario = (req, res) => {
+    const usuario = req.params.usuario;
+    tareas.findAll({
+        where: {
+            usuario: usuario
         }
     }).then(data => { res.status(200).json(data) });
 };
@@ -162,6 +174,12 @@ async function validateTarea(tarea) {
                 if (typeof tarea[key] != "boolean")
                     errors[key].format = "No es un tipo válido."
                 break;
+            case "usuario":
+                errors[key].empty = validation.empty(tarea[key]);
+
+                if (await Usuarios.findByPk(tarea[key]) == null)
+                    errors[key].none = "El usuario no existe";
+                break;
             case "fechahora":
 
                 //2021-09-04T00:00:00.000+02:00
@@ -179,7 +197,7 @@ async function validateTarea(tarea) {
                 errors[key].empty = validation.empty(tarea[key]);
 
                 //Validar si existe el proyecto
-                if(validation.cif(tarea["grupoempresa"]) == undefined){
+                if(validation.cif(tarea["grupoempresa"]) == true){
 
                     if (validation.number(tarea["grupocodigo"]) == undefined) {
                         if (await grupos.findOne({ where: { codigo: tarea["grupocodigo"], empresa: tarea["grupoempresa"] } }) == null)

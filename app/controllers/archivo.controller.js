@@ -3,6 +3,7 @@ const Archivos = db.archivos;
 const Tareas = db.tareas;
 const validation = require("../validation/validation");
 const fileext = require("../models/fileext.enum");
+const myLogger = require("../log/logger");
 
 //Crear archivo
 exports.create = async(req, res) => {
@@ -17,8 +18,12 @@ exports.create = async(req, res) => {
         return;
     }
 
-    Archivos.create(usuario).then(data => {
-            res.status(201).send(data);
+    myLogger.log(archivo);
+
+    Archivos.create(archivo).then(data => {
+            res.status(201).send({
+                message: "Archivo creado con éxito."
+            });
         })
         .catch(err => {
             res.status(500).send({
@@ -49,7 +54,7 @@ exports.findByTarea = (req, res) => {
     tareagrupoempresa: req.params.tareagrupoempresa}}).then(data => { res.status(200).json(data) });
 };
 
-// Modificar
+// Modificar//
 exports.update = async(req, res) => {
     const id = req.params.id;
 
@@ -69,17 +74,17 @@ exports.update = async(req, res) => {
         tareagrupoempresa: req.params.tareagrupoempresa}}).then(num => {
             if (num == 1) {
                 res.send({
-                    message: "La archivo ha sido modificado exitosamente."
+                    message: "El archivo ha sido modificado exitosamente."
                 });
             } else {
                 res.send({
-                    message: `No es posible modificar el archivo con CIF ${id}. Compruebe el dirección o el cuerpo de el request.`
+                    message: `No es posible modificar el archivo con código ${id}.`
                 });
             }
         })
         .catch(err => {
             res.status(500).send({
-                message: "Error modificando el archivo con CIF " + id + "."
+                message: "Error modificando el archivo con código " + id + "."
             });
         });
 };
@@ -121,9 +126,10 @@ async function validateArchivo(archivo) {
         switch (key) {
             case "tareacodigo":
             case "tareagrupocodigo":
+            case "tareagrupoempresa":
 
                 //Validar si existe tarea
-                if (Tareas.findOne({
+                if (await Tareas.findOne({
                         where: {
                             codigo: archivo["tareacodigo"],
                             grupocodigo: archivo["tareagrupocodigo"],
@@ -134,18 +140,17 @@ async function validateArchivo(archivo) {
 
                 break;
             case "archivo":
-                errors[key].xtsn = validation.maxtsn(mensaje[key], 64000);
-                var duplicate = await Archivos.findOne({ where: { archivo: archivo.archivo } });
-                (duplicate == null) ? false: errors[key].unique = "El dato debe ser único";
+                errors[key].xtsn = validation.maxtsn(archivo[key], 64000);
                 break;
             case "maxsizekb":
                 errors[key].valid = validation.number(archivo[key]);
                 errors[key].minimum = validation.compare(archivo[key]);
                 break;
             case "fileextletters":
-                errors[key].format = validation.email(archivo[key]);
 
-                if (!validation.contenidoEn(archivo[key], fileext))
+                errors[key].format = validation.maxtsn(archivo[key],4);
+
+                if (validation.contenidoEn(archivo[key], fileext))
                     errors[key].fileext = "No es una extensión de archivo válida.";
 
                 break;

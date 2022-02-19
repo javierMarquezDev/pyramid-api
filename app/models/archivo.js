@@ -39,7 +39,7 @@ module.exports = function(sequelize, Sequelize) {
             allowNull: true
         },
         maxsizekb: {
-            type: Sequelize.REAL,
+            type: Sequelize.INTEGER,
             allowNull: false
         },
         fileextletters: {

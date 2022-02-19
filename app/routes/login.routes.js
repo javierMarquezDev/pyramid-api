@@ -6,5 +6,5 @@ module.exports = app => {
 
     router.post("/login",login.login);
 
-    app.use('/', router);
+    app.use('/api', router);
 }

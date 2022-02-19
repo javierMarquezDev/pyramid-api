@@ -2,6 +2,7 @@ const db = require("../models");
 const validation = require("../validation/validation");
 const Empresas = db.empresas;
 const Usuarios = db.usuarios;
+const {Op} = require('sequelize');
 
 //Crear empresa
 exports.create = async(req, res) => {
@@ -17,7 +18,9 @@ exports.create = async(req, res) => {
     const empresa = req.body;
 
     Empresas.create(empresa).then(data => {
-            res.status(201).send(data);
+            res.status(201).send({
+                message: "Empresa creada con éxito."
+            });
         })
         .catch(err => {
             res.status(500).send({
@@ -34,7 +37,18 @@ exports.findAll = (req, res) => {
 
 // Mostrar por nombre
 exports.name = (req, res) => {
-    Empresas.findAll({ where: { nombre: req.params.nombre } }).then(data => { res.status(200).json(data) });
+    Empresas.findAll({ where: {
+         nombre: {
+             [Op.or]:[
+                 {[Op.iLike]:req.params.nombre},
+                 {[Op.iLike]:'%'+req.params.nombre+'%'},
+                 {[Op.iLike]:req.params.nombre+'%'},
+                 {[Op.iLike]:'%'+req.params.nombre}
+
+             ]
+         }
+        } 
+        }).then(data => { res.status(200).json(data) });
 };
 
 // Mostrar por admin
@@ -65,11 +79,11 @@ exports.update = async (req, res) => {
         }).then(num => {
             if (num == 1) {
                 res.send({
-                    message: "La empresa ha sido modificado exitosamente."
+                    message: "La empresa ha sido modificada exitosamente."
                 });
             } else {
                 res.send({
-                    message: `No es posible modificar la empresa con CIF ${id}. Compruebe la dirección o el cuerpo de la request.`
+                    message: `No es posible modificar la empresa con CIF ${id}.`
                 });
             }
         })
@@ -89,11 +103,11 @@ exports.deleteOne = (req, res) => {
         }).then(num => {
             if (num == 1) {
                 res.send({
-                    message: "La empresa fue eliminado con éxito."
+                    message: "La empresa fue eliminada con éxito."
                 });
             } else {
                 res.send({
-                    message: `No pudo eliminarse la empresa con CIF ${id}. La dirección puede estar equivocada.`
+                    message: `No pudo eliminarse la empresa con CIF ${id}.`
                 });
             }
         })
@@ -107,7 +121,7 @@ exports.deleteOne = (req, res) => {
 //VAlIDATE EMPRESA
 async function validateEmpresa(empresa) {
 
-    var empty = true;
+    var empty = true;////
     var errors = {};
 
     for (var key in empresa) {
@@ -116,12 +130,12 @@ async function validateEmpresa(empresa) {
             case "nif":
                 errors[key].empty = validation.empty(empresa[key]);
                 errors[key].xtsn = validation.maxtsn(empresa[key], 9);
-                errors[key].format = validation.cif(empresa[key]);
+                errors[key].format = (validation.cif(empresa[key]))?undefined:"El CIF no es válido.";
 
                 //Comprobar que el CIF no está pillado
                 if (await Empresas.findByPk(empresa[key]) != null)
                     errors[key].exists = "El CIF ya existe.";
-
+//
                 break;
             case "razonsocial":
                 errors[key].empty = validation.empty(empresa[key]);

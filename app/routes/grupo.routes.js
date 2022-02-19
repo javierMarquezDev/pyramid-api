@@ -12,6 +12,9 @@ module.exports = app => {
     // Retrieve all grupos
     //router.get("/", grupos.findAll);
 
+    // Retrieve grupos from one empresa
+    router.get("/empresa/search/:empresa",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {grupos.empresa(req,res)} );
+
     //Retrieve grupos from one usuario
     router.get("/usuario/search/:user", (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {grupos.usuario(req,res)} );
 
@@ -26,9 +29,6 @@ module.exports = app => {
 
     // Retrieve one grupo
     router.get("/:empresa/:id",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {grupos.findOne(req,res)} );
-
-    // Retrieve grupos from one empresa
-    router.get("/:empresa",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {grupos.empresa(req,res)} );
 
     // Create one grupo
     router.post("/:empresa",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => { grupos.create(req,res)});

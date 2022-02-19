@@ -8,5 +8,5 @@ module.exports = app => {
 
     router.post("/logout", (req,res,next)=>{auth.auth(req,res,next)}, (req,res) =>{logout.logout(req,res)} );
 
-    app.use('/', router);
+    app.use('/api', router);
 }

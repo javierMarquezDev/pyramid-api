@@ -11,6 +11,9 @@ module.exports = app => {
     // Retrieve all tareas from one proyecto
     router.get("/:grupoempresa/:grupocodigo",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {tareas.proyecto(req,res)} );
 
+    // Retrieve all tareas from one usuario
+    router.get("/:usuario",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {tareas.usuario(req,res)} );
+
     // Retrieve one tarea
     router.get("/:grupoempresa/:grupocodigo/:id",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {tareas.findOne(req,res)} );
 
@@ -24,5 +27,5 @@ module.exports = app => {
     router.delete("/:grupoempresa/:grupocodigo/:id",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {tareas.deleteOne(req,res)} );
 
     app.use('/api/tareas', router);
-
+//
 }

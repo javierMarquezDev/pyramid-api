@@ -1,3 +1,4 @@
+const myLogger = require("../log/logger");
 const db = require("../models");
 const noticia = require("../models/noticia");
 const Noticias = db.noticias;
@@ -8,8 +9,6 @@ const Op = db.Sequelize.Op;
 
 //Crear noticia
 exports.create = async(req, res) => {
-
-    console.log(req.body);
 
     //Validar
     const errors = await validateNoticia(req.body);
@@ -26,7 +25,9 @@ exports.create = async(req, res) => {
     noticia.autor = req.params.autor;
 
     Noticias.create(noticia).then(data => {
-            res.status(201).send(data);
+            res.status(201).send({
+                message: "Noticia creada con éxito."
+            });
 
         })
         .catch(err => {
@@ -71,7 +72,7 @@ exports.usuario = async (req, res) => {
     await Noticias.findAll({ where: { grupoempresa: grupoempresa, grupocodigo: grupocodigo, autor: autor } }).then(data => { res.status(200).json(data) });
 };
 
-
+//
 // Modificar
 exports.update = async(req, res) => {
     const grupoempresa = req.params.grupoempresa;
@@ -79,6 +80,7 @@ exports.update = async(req, res) => {
     const autor = req.params.autor;
     const codigo = req.params.codigo;
 
+    let noticia = req.body
     noticia.grupoempresa = grupoempresa;
     noticia.grupocodigo = grupocodigo;
     noticia.autor = autor;
@@ -140,6 +142,8 @@ exports.deleteOne = async (req, res) => {
 //VAlIDATE NOTICIA
 async function validateNoticia(noticia) {
 
+    myLogger.log(noticia)
+
     var empty = true;
     var errors = {};
 
@@ -159,16 +163,26 @@ async function validateNoticia(noticia) {
                 } else {
                     errors["noticiacodigo"].format = "Tipo no válido.";
                 }
+                break; 
+
+            case "autor":
+                errors[key].empty = validation.empty(grupo[key]);
+
+                //Validar si existe el autor
+                if (await Usuarios.findByPk(grupo[key]) == null)
+                    errors[key].none = "El autor no existe";
                 break;
             case "fechahora":
                 //2021-09-04T00:00:00.000+02:00
+                myLogger.log(noticia[key]);    
 
                 if (isNaN(Date.parse(noticia[key]))) {
                     errors[key].format = "No es una fecha válida."
                 } else {
-                    noticia[key] = new Date(Date.parse(noticia[key])).toISOString();
+                    noticia[key] = new Date(Date.parse(noticia[key])).toISOString(); 
+                    
                 }
-
+  
                 break;
             case "texto":
                 errors[key].empty = validation.empty(noticia[key]);

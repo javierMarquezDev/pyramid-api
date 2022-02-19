@@ -27,7 +27,9 @@ exports.create = async(req, res) => {
 
 
     usuariogrupos.create(usuariogrupo).then(data => {
-            res.status(201).send(data);
+            res.status(201).send({
+                message: "Usuario añadido con éxito."
+            });
         })
         .catch(err => {
             res.status(500).send({
@@ -60,7 +62,7 @@ exports.usuario = (req, res) => {
 exports.grupo = (req, res) => {
     const codigo = req.params.codigo;
     const empresa = req.params.empresa;
-    usuariogrupos.findAll({ where: { codigo: codigo, empresa: empresa } }).then(data => { res.status(200).json(data) });
+    usuariogrupos.findAll({ where: { codigogrupo: codigo, empresagrupo: empresa } }).then(data => { res.status(200).json(data) });
 };
 
 // Modificar

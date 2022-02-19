@@ -1,4 +1,5 @@
 const { json } = require('body-parser');
+const myLogger = require('../log/logger');
 const Logger = require('../log/logger');
 const db = require("../models");
 const Usuarios = db.usuarios;
@@ -120,25 +121,24 @@ exports.deleteOne = (req, res) => {
 
 //Obtener notificaciones
 exports.getNotification = async(req,res) => {
-    Usuarios.findByPk(req.params.id).then(data => { 
-        var notificacion;
+    const ntfs = await Usuarios.findByPk(req.params.id).then(data => {
+        if(data != null) return data.dataValues.notificaciones;
+    })
 
-        notificacionArray = Array.from(data.dataValues.notificaciones);
-
-        notificacionArray.forEach(element => {
-            if(element.codigo == req.params.notificacion){
-                notificacion = element;
-            }
-                
-        });
-
-        res.status(200).json(notificacion)
-    });
+    res.status(200).json(ntfs);
 }
 
 //Obtener notificaciones
 exports.getOneNotification = async(req,res) => {
-    Usuarios.findByPk(req.params.id).then(data => { res.status(200).json(data.dataValues.notificaciones)});
+    const ntfs = await Usuarios.findByPk(req.params.id).then(data => {
+        if(data != null) return data.dataValues.notificaciones;
+    })
+    let ntf = null;
+    ntfs.forEach(element => {
+        if(element.codigo==req.params.notificacion)
+            ntf = element
+    });
+    res.status(200).json(ntf);
 }
 
 //Añadir notificaciones
@@ -200,29 +200,28 @@ exports.removeNotification = async(req, res) => {
     const id = req.params.id;
     const notificacion = req.params.notificacion;
 
-    var notificaciones = await Usuarios.findByPk(id).then(data => { return data.dataValues.notificaciones });
-
-    notificacionArray = Array.from(notificaciones);
+    var notificaciones = await Usuarios.findByPk(id).then(data => data.dataValues.notificaciones) 
 
     var i = 0;
-    var found = NaN;
+    var found = -1;
 
-    notificacionArray.forEach(element => {
+    notificaciones.forEach(element => {
+        myLogger.log(element);
+        if (element.codigo == notificacion) { found = i;}
         i++;
-        if (element.codigo == notificacion) { found = i - 1; }
     });
-    if (found != NaN) notificacionArray.splice(found, 1);
+    if (found >= 0) {
+        notificaciones.splice(found, 1);
+    }
 
-    const body = { "notificaciones": notificacionArray };
+    const body = { "notificaciones": notificaciones };
 
     Usuarios.update(
             body, {
                 where: { email: id }
             }).then(num => {
             if (num == 1) {
-                res.send({
-                    message: "La notificación ha sido eliminada exitosamente."
-                });
+                res.send((found>=0)?{message:"La notificación fue eliminada exitosamente."}:{message:"La notificación no pudo encontrase."});
             } else {
                 res.send({
                     message: `No es posible eliminar la notificación.` +

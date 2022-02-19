@@ -16,7 +16,7 @@ module.exports = function(sequelize, Sequelize) {
                 key: 'codigo'
             }
         },
-        empresacodigo: {
+        grupoempresa: {
             type: Sequelize.STRING(9),
             allowNull: false,
             primaryKey: true,
@@ -41,7 +41,15 @@ module.exports = function(sequelize, Sequelize) {
         fechahora: {
             type: Sequelize.DATE,
             allowNull: true
-        }
+        },
+        usuario: {
+            type: Sequelize.STRING(30),
+            allowNull: false,
+            references: {
+                model: 'usuario',
+                key: 'email'
+            }
+        },
     }, {
         sequelize,
         tableName: 'tarea',

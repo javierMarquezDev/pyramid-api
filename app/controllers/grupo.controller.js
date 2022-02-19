@@ -1,3 +1,4 @@
+const myLogger = require("../log/logger");
 const db = require("../models");
 const grupo = require("../models/grupo");
 const usuariogrupos = db.usuariogrupos;
@@ -21,7 +22,9 @@ exports.create = async(req, res) => {
     }
 
     grupos.create(grupo).then(data => {
-            res.status(201).send(data);
+            res.status(201).send({
+                message: "Grupo creado con éxito."
+            });
         })
         .catch(err => {
             res.status(500).send({
@@ -109,7 +112,7 @@ exports.update = async(req, res) => {
                 });
             } else {
                 res.status(400).send({
-                    message: `No es posible modificar el grupo con código ${id} de la empresa con CIF ${empresa}. Compruebe la dirección o el cuerpo de la request.`
+                    message: `No es posible modificar el grupo con código ${id} de la empresa con CIF ${empresa}.`
                 });
             }
         })
@@ -164,7 +167,7 @@ async function validateGrupo(grupo) {
                 //Validar si existe la empresa
                 if (await Empresas.findByPk(grupo[key]) == null)
                     errors[key].none = "La empresa asociada no existe";
-                break;
+                break;//
 
             case "nombre":
                 errors[key].empty = validation.empty(grupo[key]);
@@ -185,15 +188,15 @@ async function validateGrupo(grupo) {
 
                 //2021-09-04T00:00:00.000+02:00
 
-                if (isNaN(Date.parse(proyecto[key]))) {
+                if (isNaN(Date.parse(grupo[key]))) {
                     errors[key].format = "No es una fecha válida."
                 } else {
-                    proyecto[key] = new Date(Date.parse(proyecto[key])).toISOString();
+                    grupo[key] = new Date(Date.parse(grupo[key])).toISOString();
                 }
 
                 break;
             case "finalizado":
-                if (typeof proyecto[key] != "boolean") {
+                if (typeof grupo[key] != "boolean") {
                     errors[key].type = "Tipo de dato no válido."
                 }
 

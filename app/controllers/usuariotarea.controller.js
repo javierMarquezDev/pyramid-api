@@ -23,7 +23,9 @@ exports.create = async(req, res) => {
     }
 
     usuariotareas.create(usuariotarea).then(data => {
-            res.status(201).send(data);
+            res.status(201).send({
+                message: "Tarea asignada con éxito."
+            });
         })
         .catch(err => {
             res.status(500).send({
