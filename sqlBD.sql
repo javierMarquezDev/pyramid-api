@@ -1,4 +1,10 @@
--- SCHEMA: pyramid
+
+CREATE SCHEMA IF NOT EXISTS public
+    AUTHORIZATION postgres;
+
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+GRANT ALL ON SCHEMA public TO postgres;
 
 -- DROP SCHEMA pyramid ;
 
