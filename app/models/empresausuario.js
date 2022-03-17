@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, Sequelize) {
-    return sequelize.define('usuariogrupo', {
+    return sequelize.define('empresausuario', {
         usuario: {
             type: Sequelize.STRING(30),
             allowNull: false,
@@ -18,6 +18,11 @@ module.exports = function(sequelize, Sequelize) {
                 model: 'empresa',
                 key: 'nif'
             }
+        },
+        admin: {
+            type: Sequelize.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         }
     }, {
         sequelize,

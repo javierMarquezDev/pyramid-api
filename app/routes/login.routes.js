@@ -6,5 +6,9 @@ module.exports = app => {
 
     router.post("/login",login.login);
 
+    router.post('/token',login.checkToken);
+
+    router.post('/checkpass',login.checkPass);
+
     app.use('/api', router);
 }

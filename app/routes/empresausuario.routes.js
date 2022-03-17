@@ -6,10 +6,16 @@ module.exports = app => {
     const auth = require("../middlewares/middleware.security");
 
     // Retrieve all empresausuarios by empresa
-    router.get("/:empresa",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresausuarios.empresa(req,res)} );
+    router.get("/empresa/:empresa",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresausuarios.empresa(req,res)} );
 
     // Retrieve all empresausuarios by usuario
-    router.get("/:usuario",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresausuarios.usuario(req,res)} );
+    router.get("/usuario/:usuario",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresausuarios.usuario(req,res)} );
+
+    // Retrieve all empresausuarios by usuario admin
+    router.get("/empresadmin/:usuario",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresausuarios.empresadmin(req,res)} );
+
+    // Retrieve all empresausuarios admin by empresa 
+    router.get("/adminsempresa/:empresa",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresausuarios.adminsempresa(req,res)} );
 
     // Retrieve one empresausuario
     router.get("/:empresa/:usuario",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {empresausuarios.findOne(req,res)} );

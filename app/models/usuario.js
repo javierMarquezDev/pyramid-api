@@ -28,10 +28,6 @@ module.exports = function(sequelize, Sequelize) {
             type: Sequelize.STRING(35),
             allowNull: true
         },
-        tipovia: {
-            type: Sequelize.STRING(10),
-            allowNull: false
-        },
         nombrevia: {
             type: Sequelize.STRING(50),
             allowNull: false
@@ -48,6 +44,14 @@ module.exports = function(sequelize, Sequelize) {
             type: Sequelize.JSON,
             allowNull: false,
             defaultValue: {}
+        },
+        provincia: {
+            type: Sequelize.STRING(50),
+            allowNull: true
+        },
+        localidad: {
+            type: Sequelize.STRING(50),
+            allowNull: true
         },
         counter: {
             type: Sequelize.VIRTUAL

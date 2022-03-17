@@ -1,4 +1,6 @@
 const myLogger = require("../log/logger");
+const apiKey = require('../config/api.config');
+const fetch = require('node-fetch');
 
 const rsocialsiglas = require("../models/razonsocial.enum").razonsocial;
 
@@ -141,7 +143,7 @@ exports.humanname = (fieldValue) => {
 
 //TIPO DE VÍA
 exports.tipovia = (fieldValue) => {
-    if (!/^(C.\/|Avda.\/|Crtra.\/)$/.test(fieldValue)) {
+    if (!/^(C.\/|Avda.\/|Ctra.\/||Pl.\/|P.\/)$/.test(fieldValue)) {
         return `El campo no es válido.`
     }
 }
@@ -175,7 +177,6 @@ exports.regex = (fieldValue, regex) => {
 exports.razonsocial = (fieldValue) => {
 
     fieldValue = fieldValue.trim();
-    //hola
 
     const indexSiglas = fieldValue.lastIndexOf('S.');
     const siglas = fieldValue.substr(indexSiglas, fieldValue.length);
@@ -191,5 +192,84 @@ exports.razonsocial = (fieldValue) => {
 
 //CONTENIDO SE ENCUENTRA EN ENUM bool
 exports.contenidoEn = (value, object) => {
-    return Object.keys(object).find(key => object[key] == value) == undefined;
+    return Object.keys(object).find(key => object[key] == value) != undefined;
+}
+
+//VALIDAR DIRECCIÓN GOOGLE
+exports.address  = async (direccion,errors) => {
+
+    const url = apiKey.url;
+    const key = apiKey.key;
+    const address = 
+                    ((direccion.codigopuerta != undefined)?direccion.codigopuerta.replace(' ','')+'%20':``)+
+                    `${direccion.numvia}%20${direccion.nombrevia.replace(' ','%20')}%20`+
+                    `${direccion.localidad.replace(' ','%20')}%20${direccion.provincia.replace(' ','%20')}`;
+
+    let result = {}
+
+    //Inicializar todos los datos como equivocados
+    //(errors['codigopuerta'] == null) ? errors['codigopuerta'] = {}: false;
+    errors["codigopuerta"].valid = 'Dato no válido.';
+    //(errors['numvia'] == null) ? errors['numvia'] = {}: false;
+    //errors["codigopuerta"].valid = "Dato no válido";
+    errors["numvia"].valid = "Dato no válido";
+    //(errors['nombrevia'] == null) ? errors['nombrevia'] = {}: false;
+    errors["nombrevia"].valid = "Dato no válido";
+    //(errors['nombrevia'] == null) ? errors['nombrevia'] = {}: false;
+    errors["localidad"].valid = "Dato no válido";
+    //(errors['provincia'] == null) ? errors['provincia'] = {}: false;
+    errors["provincia"].valid = "Dato no válido";
+
+    myLogger.log(`${url}address=${address}&key=${key}`)
+
+    result.errors = await fetch(`${url}address=${address}&key=${key}`)
+    .then(response => response.json())
+    .then(data => {
+
+
+        if(data.status !== 'ZERO_RESULTS'){
+
+            const addressData = data.results[0].address_components;
+
+            myLogger.log(addressData)
+
+            if(direccion.codigopuerta == undefined){
+
+                delete errors["codigopuerta"].valid;
+
+            }else if(addressData.find(element => element.types[0] == "subpremise") !== undefined)
+                
+                delete errors["codigopuerta"].valid;
+
+            if(addressData.find(element => element.types[0] == "street_number") !== undefined
+                && addressData.find(element => element.types[0] == "street_number")['long_name'] === direccion['numvia'])
+
+                delete errors["numvia"].valid;
+
+            if(addressData.find(element => element.types[0] == "route") !== undefined
+                && addressData.find(element => element.types[0] == "route")['long_name'] === direccion['nombrevia'])
+        
+                delete errors["nombrevia"].valid;
+
+            if(addressData.find(element => element.types[0] == "locality") !== undefined
+            && addressData.find(element => element.types[0] == "locality")['long_name'] === direccion['localidad'])
+                
+                delete errors["localidad"].valid;
+
+            if(addressData.find(element => element.types[0] == "administrative_area_level_2") !== undefined
+                && addressData.find(element => element.types[0] == "administrative_area_level_2")['long_name'] === direccion['provincia'])
+                
+                delete errors["provincia"].valid;
+
+
+            (data.results[0].formatted_address)
+            ?result.completeAddress=data.results[0].formatted_address
+            :false;
+        }
+
+        return errors;
+
+    })
+
+    return result;
 }

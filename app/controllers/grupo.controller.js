@@ -6,6 +6,8 @@ const grupos = db.grupos;
 const validation = require("../validation/validation");
 const Empresas = db.empresas;
 const Usuarios = db.usuarios;
+const { empresausuarios, usuarios, sequelize } = require('../models');
+const {QueryTypes} = require("sequelize");
 
 //Crear grupo
 exports.create = async(req, res) => {
@@ -23,7 +25,8 @@ exports.create = async(req, res) => {
 
     grupos.create(grupo).then(data => {
             res.status(201).send({
-                message: "Grupo creado con éxito."
+                message: "Grupo creado con éxito.",
+                grupo: data
             });
         })
         .catch(err => {
@@ -41,6 +44,7 @@ exports.findAll = (req, res) => {
 
 // Mostrar grupo según PK
 exports.findOne = (req, res) => {
+    if(isNaN(req.params.id)) res.status(404).send({message:"Parámetro no válido."});
     grupos.findOne({ where: { codigo: req.params.id, empresa: req.params.empresa } }).then(data => { res.json(data) });
 };
 
@@ -61,36 +65,66 @@ exports.fin = (req, res) => {
 
 //Mostrar grupos según usuario
 exports.usuario = async (req,res) => {
-    const user = req.params.user;
-    usuariogrupos.findAll({where:{usuario: user}}).then( async data =>{
-
-        var grupoSet = [];
-        const dataArray = Array.from(data);
-
-        for(var i = 0; i<data.length; i++){
-        
-            value = await grupos.findAll({where:{codigo: parseInt(dataArray[i].dataValues.codigogrupo) ,empresa: dataArray[i].dataValues.empresagrupo }}).then(
-                data => {
-                    return data[0].dataValues;
-                }
-            )
-
-            grupoSet.push(await value);
-        };
-
-        res.status(200).json(grupoSet);
-    })
+    sequelize.query(
+        `SELECT * from public.grupo WHERE codigo IN (SELECT codigogrupo FROM public.usuariogrupo WHERE usuario like '${req.params.user}') AND empresa IN (SELECT empresagrupo FROM public.usuariogrupo WHERE usuario like '${req.params.user}')`,
+        {type: QueryTypes.SELECT})
+    .then(data => res.status(200).json(data));
 }
 
-//Mostrar grupos según empresa y usuario
+//Mostrar usuarios según grupo
+exports.usuarios = async (req,res) => {
+    if(isNaN(req.params.codigo)) res.status(404).send({message:"Parámetro no válido."});
+    sequelize.query(
+        `SELECT * from public.usuario WHERE usuario.email IN (SELECT usuario FROM public.usuariogrupo WHERE empresagrupo LIKE '${req.params.empresa}' AND codigogrupo = '${req.params.codigo}')`,
+        {type: QueryTypes.SELECT})
+    .then(data => res.status(200).json(data));
+}
+
+//Retrieve grupos by admin
+exports.gruposadmin = (req,res) => {
+    sequelize.query(
+        `SELECT * from public.grupo WHERE grupo.empresa `+
+         `IN (SELECT empresagrupo FROM public.usuariogrupo WHERE usuario like '${req.params.email}' AND administrador IS TRUE) `+
+         `AND grupo.codigo IN (SELECT codigogrupo FROM public.usuariogrupo WHERE usuario like '${req.params.email}' AND administrador IS TRUE)`,
+        {type: QueryTypes.SELECT})
+    .then(data => res.status(200).json(data));
+}
+
+//Retrieve admins by grupo
+exports.adminsgrupo = (req,res) => {
+    if(isNaN(req.params.codigo)) res.status(404).send({message:"Parámetro no válido."});
+    sequelize.query(
+        `SELECT * from public.usuario WHERE usuario.email IN `+
+        `(SELECT usuario FROM public.usuariogrupo WHERE (codigogrupo,empresagrupo) = ('${req.params.codigo}','${req.params.empresa}') AND administrador IS TRUE)`,
+        {type: QueryTypes.SELECT})
+    .then(data => res.status(200).json(data));
+}
+
+//Check if usuario is admin
+exports.checkAdmin = (req,res) => {
+    if(isNaN(req.params.grupocodigo)) res.status(404).send({message:"Parámetro no válido."});
+    const grupoempresa = req.params.grupoempresa;
+    const grupocodigo = req.params.grupocodigo;
+    const usuario = req.params.email;
+
+    sequelize.query(
+        `SELECT administrador from public.usuariogrupo WHERE `+
+        `codigogrupo = '${grupocodigo}' AND empresagrupo LIKE '${grupoempresa}' `+
+        `AND usuario LIKE '${usuario}'`,
+        {type: QueryTypes.SELECT})
+    .then(data => res.status(200).json(data));
+}
 
 // Modificar
 exports.update = async(req, res) => {
+    if(isNaN(req.params.id)) res.status(404).send({message:"Parámetro no válido."});
     const id = req.params.id;
     const empresa = req.params.empresa;
 
     const grupo = req.body;
     grupo.empresa = req.params.empresa;
+
+    myLogger.log(grupo)
 
     //Validar
     const errors = await validateGrupo(grupo);
@@ -125,6 +159,7 @@ exports.update = async(req, res) => {
 
 // Eliminar
 exports.deleteOne = (req, res) => {
+    if(isNaN(req.params.id)) res.status(404).send({message:"Parámetro no válido."});
     const id = req.params.id;
     const empresa = req.params.empresa;
 
@@ -146,9 +181,47 @@ exports.deleteOne = (req, res) => {
         })
         .catch(err => {
             res.status(500).send({
-                message: `Error al intentar eliminar el grupo con código ${id} de la empresa con CIF ${empresa}`
+                message: `Error al intentar eliminar el grupo con código ${id} de la empresa con CIF ${empresa} `+err
             });
         })
+}
+
+exports.addUsuarios = (req,res) => {
+    usuariogrupos.bulkCreate(req.body)
+    .then(data => {
+        res.status(200).send({message:"Usuario(s) añadido(s) con éxito"})
+    })
+    .catch(err => res.status(500).send({message:"Error del servidor. "+err}))
+}
+
+exports.modifyUsuarios = (req,res) => {
+
+    myLogger.log(req.body)
+
+    if(isNaN(req.params.codigo)) res.status(404).send({message:"Parámetro no válido."});
+
+    grupos.findOne({where:{
+                        codigo:req.params.codigo,
+                        empresa:req.params.empresa
+                    }})
+    .then(data => {
+            usuariogrupos.destroy({where:{codigogrupo:req.params.codigo, empresagrupo:req.params.empresa}})
+            .then(data => {
+
+                myLogger.log(req.body)
+
+                usuariogrupos.bulkCreate(req.body)
+                .then(data => {
+                    res.status(200).send({message:"Usuario(s) añadido(s) con éxito"})
+                })
+                .catch(err => {
+                    myLogger.log(err)
+                    res.status(500).send({message:"Error del servidor. ", error:err})})
+
+            });
+        
+    })
+
 }
 
 //VAlIDATE GRUPO
@@ -174,15 +247,8 @@ async function validateGrupo(grupo) {
                 errors[key].xtsn = validation.maxtsn(grupo[key], 30);
                 break;
             case "descripcion":
-                errors[key].empty = validation.empty(grupo[key]);
+                errors[key].empty = validation.empty( grupo[key]);
                 errors[key].xtsn = validation.maxtsn(grupo[key], 200);
-                break;
-            case "administrador":
-                errors[key].empty = validation.empty(grupo[key]);
-
-                //Validar si existe la empresa
-                if (await Usuarios.findByPk(grupo[key]) == null)
-                    errors[key].none = "El usuario administrador no existe";
                 break;
             case "fechahora":
 
@@ -196,8 +262,11 @@ async function validateGrupo(grupo) {
 
                 break;
             case "finalizado":
-                if (typeof grupo[key] != "boolean") {
-                    errors[key].type = "Tipo de dato no válido."
+                if (!(Boolean(grupo[key]) === true || Boolean(grupo[key]) === false)) {
+                    errors[key].format = "Tipo de dato no válido."
+
+                }else{
+                    grupo[key] = Boolean(grupo[key])
                 }
 
                 break;

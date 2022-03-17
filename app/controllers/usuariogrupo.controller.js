@@ -1,3 +1,4 @@
+const myLogger = require("../log/logger");
 const db = require("../models");
 const usuario = require("../models/usuario");
 const Usuarios = db.usuarios;
@@ -9,12 +10,14 @@ const validation = require("../validation/validation")
 //Crear usuariogrupo
 exports.create = async(req, res) => {
 
-    const usuariogrupo = req.body;
+    if(isNaN(req.params.id)) res.status(404).send({message:"Parámetro no válido."});
 
-    if (req.params.id != null && req.params.empresa != null) {
-        usuariogrupo.codigogrupo = parseInt(req.params.id);
-        usuariogrupo.empresagrupo = req.params.empresa;
-    }
+    const usuariogrupo = req.body;
+    usuariogrupo.codigogrupo = req.params.id;
+    usuariogrupo.empresagrupo = req.params.empresa;
+    
+
+    myLogger.log(usuariogrupo)
 
     //Validar
     const errors = await validateUsuariogrupo(usuariogrupo);
@@ -32,6 +35,7 @@ exports.create = async(req, res) => {
             });
         })
         .catch(err => {
+            myLogger.log(err)
             res.status(500).send({
                 message: err.message || "Error creando la fila."
             });
@@ -46,6 +50,9 @@ exports.findAll = (req, res) => {
 
 // Mostrar según PK
 exports.findOne = (req, res) => {
+    if(isNaN(req.params.codigo)) res.status(404).send({message:"Parámetro no válido."});
+
+    myLogger.log(req.params)
     const usuario = req.params.usuario;
     const codigo = req.params.codigo;
     const empresa = req.params.empresa;
@@ -60,6 +67,8 @@ exports.usuario = (req, res) => {
 
 // Mostrar según grupo
 exports.grupo = (req, res) => {
+    if(isNaN(req.params.codigo)) res.status(404).send({message:"Parámetro no válido."});
+
     const codigo = req.params.codigo;
     const empresa = req.params.empresa;
     usuariogrupos.findAll({ where: { codigogrupo: codigo, empresagrupo: empresa } }).then(data => { res.status(200).json(data) });
@@ -67,6 +76,8 @@ exports.grupo = (req, res) => {
 
 // Modificar
 exports.update = async(req, res) => {
+
+    if(isNaN(req.params.codigo)) res.status(404).send({message:"Parámetro no válido."});
 
     const usuariogrupo = req.body;
 
@@ -149,9 +160,9 @@ async function validateUsuariogrupo(usuariogrupo) {
                 break;
 
             case "administrador":
-                if (typeof usuariogrupo[key] != "boolean") {
-                    errors[key].type = "Tipo de dato no válido."
-                }
+                errors[key].empty = validation.empty(usuariogrupo[key]);
+                if (!(Boolean(usuariogrupo[key]) === true || Boolean(usuariogrupo[key]) === false))
+                    errors[key].format = "No es un tipo válido."
 
                 break;
 

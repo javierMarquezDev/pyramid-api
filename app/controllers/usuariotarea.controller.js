@@ -43,6 +43,8 @@ exports.findAll = (req, res) => {
 // Mostrar según PK
 exports.findOne = (req, res) => {
 
+    if(isNaN(req.params.tareacodigoproyecto) || isNaN(req.params.tareacodigo)) res.status(404).send({message:"Parámetro no válido."});
+
     const atareado = req.params.atareado;
     const tareaadministradorproyecto = req.params.tareaadministradorproyecto;
     const tareacodigoproyecto = req.params.tareacodigoproyecto;
@@ -71,6 +73,9 @@ exports.usuario = (req, res) => {
 
 // Mostrar según tarea
 exports.tarea = (req, res) => {
+
+    if(isNaN(req.params.tareacodigoproyecto) || isNaN(req.params.tareacodigo)) res.status(404).send({message:"Parámetro no válido."});
+
     const tareaadministradorproyecto = req.params.tareaadministradorproyecto;
     const tareacodigoproyecto = req.params.tareacodigoproyecto;
     const tareacodigo = req.params.tareacodigo;
@@ -86,6 +91,9 @@ exports.tarea = (req, res) => {
 
 // Modificar
 exports.update = async(req, res) => {
+
+    if(isNaN(req.params.tareacodigoproyecto) || isNaN(req.params.tareacodigo)) res.status(404).send({message:"Parámetro no válido."});
+
     const atareado = req.params.atareado;
     const tareaadministradorproyecto = req.params.tareaadministradorproyecto;
     const tareacodigoproyecto = req.params.tareacodigoproyecto;
@@ -130,6 +138,9 @@ exports.update = async(req, res) => {
 
 // Eliminar
 exports.deleteOne = (req, res) => {
+
+    if(isNaN(req.params.tareacodigoproyecto) || isNaN(req.params.tareacodigo)) res.status(404).send({message:"Parámetro no válido."});
+
     const atareado = req.params.atareado;
     const tareaadministradorproyecto = req.params.tareaadministradorproyecto;
     const tareacodigoproyecto = req.params.tareacodigoproyecto;
@@ -160,7 +171,7 @@ exports.deleteOne = (req, res) => {
         })
 }
 
-//VAlIDATE PROYECTOUSUARIO
+//VAlIDATE USUARIOTAREA
 async function validateUsuariotarea(usuariotarea) {
 
     var empty = true;

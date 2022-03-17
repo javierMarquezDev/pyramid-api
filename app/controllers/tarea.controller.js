@@ -1,4 +1,5 @@
-const { grupos } = require("../models");
+const myLogger = require("../log/logger");
+const { grupos, sequelize } = require("../models");
 const db = require("../models");
 const tareas = db.tareas;
 const Op = db.Sequelize.Op;
@@ -43,6 +44,7 @@ exports.findAll = (req, res) => {
 
 // Mostrar según PK
 exports.findOne = (req, res) => {
+    if(isNaN(req.params.grupocodigo) || isNaN(req.params.id)) res.status(404).send({message:"Parámetro no válido."});
     const id = req.params.id;
     const grupocodigo = req.params.grupocodigo;
     const grupoempresa = req.params.grupoempresa;
@@ -57,6 +59,7 @@ exports.findOne = (req, res) => {
 
 // Mostrar según proyecto
 exports.proyecto = (req, res) => {
+    if(isNaN(req.params.grupocodigo)) res.status(404).send({message:"Parámetro no válido."});
     const grupocodigo = req.params.grupocodigo;
     const grupoempresa = req.params.grupoempresa;
     tareas.findAll({
@@ -81,6 +84,8 @@ exports.usuario = (req, res) => {
 
 // Modificar
 exports.update = async(req, res) => {
+    if(isNaN(req.params.grupocodigo) || isNaN(req.params.id)) res.status(404).send({message:"Parámetro no válido."});
+    
     const id = req.params.id;
     const grupocodigo = req.params.grupocodigo;
     const grupoempresa = req.params.grupoempresa;
@@ -92,6 +97,8 @@ exports.update = async(req, res) => {
 
     //Validar
     const errors = await validateTarea(tarea);
+
+    myLogger.log(tarea)
 
     if (errors != null) {
         res.status(400).send(errors);
@@ -124,6 +131,7 @@ exports.update = async(req, res) => {
 
 // Eliminar
 exports.deleteOne = (req, res) => {
+    if(isNaN(req.params.grupocodigo) || isNaN(req.params.id)) res.status(404).send({message:"Parámetro no válido."});
     const id = req.params.id;
     const grupocodigo = req.params.grupocodigo;
     const grupoempresa = req.params.grupoempresa;
@@ -152,6 +160,18 @@ exports.deleteOne = (req, res) => {
         })
 }
 
+//Retrieve all tareas from grupo and usuario
+exports.grupousuario = (req,res) => {
+    if(isNaN(req.params.grupocodigo)) res.status(404).send({message:"Parámetro no válido."});
+
+    const grupoempresa = req.params.grupoempresa;
+    const grupocodigo = req.params.grupocodigo;
+    const email = req.params.usuario;
+
+    tareas.findAll({where:{grupoempresa:grupoempresa, grupocodigo:grupocodigo, usuario:email}})
+    .then(data => res.status(200).json(data))
+}
+
 //VAlIDATE PROYECTOUSUARIO
 async function validateTarea(tarea) {
 
@@ -171,8 +191,12 @@ async function validateTarea(tarea) {
                 errors[key].xtsn = validation.maxtsn(tarea[key], 200);
                 break;
             case "checked":
-                if (typeof tarea[key] != "boolean")
+                if (!(Boolean(tarea[key]) === true || Boolean(tarea[key]) === false)) {
                     errors[key].format = "No es un tipo válido."
+                }else{
+                    tarea[key] = Boolean(tarea[key])
+                }
+
                 break;
             case "usuario":
                 errors[key].empty = validation.empty(tarea[key]);
@@ -209,7 +233,7 @@ async function validateTarea(tarea) {
                     }
 
                 }else{
-                    errors["grupoempresa"].format = "CIF no válido";
+                    errors[key].format = "CIF no válido";
                 }
 
                 
@@ -221,12 +245,20 @@ async function validateTarea(tarea) {
 
     }
 
+    let empties = [];
+
     for (var key in errors) {
         if (JSON.stringify(errors[key]) != "{}") {
             empty = false;
-            break;
+        }else{
+            empties.push(key);
         }
     }
+
+    empties.forEach(element => {
+        delete errors[element];
+        
+    });
 
     (empty) ? errors = null: false;
     return errors;

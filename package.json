@@ -24,11 +24,12 @@
         "jsonwebtoken": "^8.5.1",
         "jwt-simple": "^0.5.6",
         "morgan": "^1.10.0",
-        "pg": "^8.6.0",
-        "pg-hstore": "^2.3.3",
+        "node-fetch": "^2.6.7",
+        "pg": "^8.7.3",
+        "pg-hstore": "^2.3.4",
         "react": "^17.0.2",
         "react-dom": "^17.0.2",
-        "sequelize": "^6.6.2",
+        "sequelize": "^6.16.2",
         "ws": "^7.4.4"
     },
     "devDependencies": {

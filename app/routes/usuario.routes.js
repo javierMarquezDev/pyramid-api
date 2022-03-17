@@ -14,6 +14,9 @@ module.exports = app => {
     // Retrieve one usuario
     router.get("/:id",(req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuarios.findOne(req,res)});
 
+    // Retrieve all by grupo
+    router.get("/grupo/:grupoempresa/:grupocodigo",(req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuarios.findByGrupo(req,res)});
+
     // Update a Usuario
     router.put("/:id",(req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {usuarios.update(req,res)});
 

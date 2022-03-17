@@ -1,16 +1,19 @@
 const { json } = require('body-parser');
+
 const myLogger = require('../log/logger');
 const Logger = require('../log/logger');
+
 const db = require("../models");
 const Usuarios = db.usuarios;
 const validation = require("../validation/validation");
 const Rolusuarios = db.rolusuarios;
 
+
 // Crear
 exports.create = async(req, res) => {
 
     //Validar
-    const errors = await validateUsuario(req.body);
+    const errors = await validateUsuario(req.body,true);
 
     if (errors != null) {
         res.status(400).send(errors);
@@ -28,6 +31,7 @@ exports.create = async(req, res) => {
         });    
         })
         .catch(err => {
+            myLogger.log(err)
             res.status(500).send({
                 message: "Error creando el Usuario.",
                 error: err
@@ -51,7 +55,7 @@ exports.findOne = async(req, res) => {
         });
 
     } catch (UnhandledPromiseRejectionWarning) {
-        res.status(400).json({ error: "Usuario no encontrado" });
+        res.status(400).json({ error: "El usuario no existe." });
     }
 
 };
@@ -63,6 +67,8 @@ exports.rol = (req, res) => {
 
 // Modificar
 exports.update = async(req, res) => {
+
+    myLogger.log(req.body)
 
     //Validar
     const errors = await validateUsuario(req.body);
@@ -108,13 +114,13 @@ exports.deleteOne = (req, res) => {
                 });
             } else {
                 res.send({
-                    message: `No pudo eliminarse el usuario con dirección de correo ${id}. La dirección puede estar equivocada.`
+                    error: `No pudo eliminarse el usuario con dirección de correo ${id}. La dirección puede estar equivocada.`
                 });
             }
         })
         .catch(err => {
             res.status(500).send({
-                message: "Error al intentar eliminar el usuario con dirección " + id + "."
+                error: "Error al intentar eliminar el usuario con dirección " + id + "."
             });
         })
 }
@@ -236,7 +242,15 @@ exports.removeNotification = async(req, res) => {
         });
 }
 
-async function validateUsuario(usuario) {
+//Retrieve by grupo
+exports.findByGrupo = (req,res) =>{
+    sequelize.query(
+        `SELECT * from public.usuario WHERE usuario.email IN (SELECT usuario FROM public.usuariogrupo WHERE grupo.empresa like '${req.params.grupoempresa}' AND grupo.codigo like '${req.params.grupocodigo}')`,
+        {type: QueryTypes.SELECT})
+    .then(data => res.status(200).json(data));
+}
+
+async function validateUsuario(usuario,creating=false) {
     var empty = true;
     var errors = {};
     for (var key in usuario) {
@@ -252,17 +266,6 @@ async function validateUsuario(usuario) {
             case "contrasena":
                 errors[key].empty = validation.empty(usuario[key]);
 
-                const usuarioBd = await Usuarios.findOne({where: {dni:usuario.dni}}).then(data =>data);
-
-
-                Logger.log(usuarioBd);
-                if(usuarioBd != null && usuarioBd.contrasena === usuario.contrasena){
-                    usuario.contrasena = undefined;
-                    break;
-                }
-
-                errors[key].xtsn = validation.maxtsn(usuario[key], 30);
-
                 if (errors[key].empty == undefined && errors[key].xtsn == undefined) {
                     usuario[key] = Usuarios.generateHash(usuario[key]);
                 }
@@ -277,20 +280,12 @@ async function validateUsuario(usuario) {
             case "dni":
                 errors.dni.empty = validation.empty(usuario[key]);
                 errors.dni.valid = validation.dni(usuario[key]);
-
-                var duplicateDni = await Usuarios.findAll({ where: { dni: usuario[key] } }).then((data)=>data);
-
-                if(duplicateDni.length != undefined && duplicateDni.length >= 2){
-                    errors.dni.unique = "El dni ya existe.";
-                    break;
-                }
+                
+                if (await Usuarios.findByPk(usuario[key]) != null)
+                    errors[key].exists = "El DNI ya está registrado.";
 
                 break;
                 
-            case "tipovia":
-                errors.tipovia.empty = validation.empty(usuario[key]);
-                errors.tipovia.valid = validation.tipovia(usuario[key]);
-                break;
             case "nombrevia":
                 errors[key].empty = validation.empty(usuario[key]);
                 errors[key].valid = validation.humanname(usuario[key]);
@@ -301,8 +296,14 @@ async function validateUsuario(usuario) {
                 break;
             case "codigopuerta":
                 errors[key].max = validation.maxtsn(usuario[key], 5);
-                errors[key].min = validation.mnxtsn(usuario[key], 1);
                 errors[key].valid = validation.regex(usuario[key], /^\w*?(º|ª)?\w*?$/);
+                break;
+
+            case "localidad":
+            case "provincia":
+                errors[key].max = validation.maxtsn(usuario[key], 50);
+                errors[key].min = validation.mnxtsn(usuario[key], 3);
+                errors[key].valid = validation.humanname(usuario[key]);
                 break;
             case "notificaciones":
                 if(usuario[key] != undefined){
@@ -316,6 +317,20 @@ async function validateUsuario(usuario) {
                 delete usuario[key];
                 break;
         }
+    }
+
+    if(usuario['nombrevia'],usuario['numvia'],usuario['localidad'],usuario['provincia'] !== undefined)
+    {
+        errors = await validation.address({
+            codigopuerta:usuario["codigopuerta"] || null,
+            numvia: usuario['numvia'],
+            nombrevia:usuario['nombrevia'],
+            localidad:usuario['localidad'],
+            provincia:usuario['provincia']
+        },errors)
+        .then(result => {
+            return result.errors;
+        });
     }
 
     let empties = [];

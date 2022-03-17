@@ -1,56 +1,26 @@
 var DataTypes = require("sequelize").DataTypes;
-var _archivo = require("./archivo");
 var _empresa = require("./empresa");
-var _encuesta = require("./encuesta");
-var _encuestausuario = require("./encuestausuario");
 var _grupo = require("./grupo");
-var _mensaje = require("./mensaje");
 var _noticia = require("./noticia");
-var _pregunta = require("./pregunta");
-var _proyecto = require("./proyecto");
 var _proyectousuario = require("./proyectousuario");
-var _rol = require("./rol");
-var _rolusuario = require("./rolusuario");
-var _sesion = require("./sesion");
 var _tarea = require("./tarea");
-var _telefono = require("./telefono");
 var _usuario = require("./usuario");
 var _usuariogrupo = require("./usuariogrupo");
 var _usuariotarea = require("./usuariotarea");
 
 function initModels(sequelize) {
-  var archivo = _archivo(sequelize, DataTypes);
   var empresa = _empresa(sequelize, DataTypes);
-  var encuesta = _encuesta(sequelize, DataTypes);
-  var encuestausuario = _encuestausuario(sequelize, DataTypes);
   var grupo = _grupo(sequelize, DataTypes);
-  var mensaje = _mensaje(sequelize, DataTypes);
   var noticia = _noticia(sequelize, DataTypes);
-  var pregunta = _pregunta(sequelize, DataTypes);
-  var proyecto = _proyecto(sequelize, DataTypes);
-  var proyectousuario = _proyectousuario(sequelize, DataTypes);
-  var rol = _rol(sequelize, DataTypes);
-  var rolusuario = _rolusuario(sequelize, DataTypes);
-  var sesion = _sesion(sequelize, DataTypes);
   var tarea = _tarea(sequelize, DataTypes);
-  var telefono = _telefono(sequelize, DataTypes);
   var usuario = _usuario(sequelize, DataTypes);
   var usuariogrupo = _usuariogrupo(sequelize, DataTypes);
   var usuariotarea = _usuariotarea(sequelize, DataTypes);
 
-  encuesta.belongsToMany(encuesta, { as: 'encuestacodigo_encuesta', through: encuestausuario, foreignKey: "encuestaautor", otherKey: "encuestacodigo" });
-  encuesta.belongsToMany(encuesta, { as: 'encuestaautor_encuesta', through: encuestausuario, foreignKey: "encuestacodigo", otherKey: "encuestaautor" });
-  encuesta.belongsToMany(encuesta, { as: 'encuestacodigo_encuesta', through: pregunta, foreignKey: "encuestaautor", otherKey: "encuestacodigo" });
-  encuesta.belongsToMany(encuesta, { as: 'encuestaautor_encuesta', through: pregunta, foreignKey: "encuestacodigo", otherKey: "encuestaautor" });
   grupo.belongsToMany(grupo, { as: 'empresagrupo_grupos', through: usuariogrupo, foreignKey: "codigogrupo", otherKey: "empresagrupo" });
   grupo.belongsToMany(grupo, { as: 'codigogrupo_grupos', through: usuariogrupo, foreignKey: "empresagrupo", otherKey: "codigogrupo" });
   grupo.belongsToMany(usuario, { as: 'autor_usuarios', through: noticia, foreignKey: "grupocodigo", otherKey: "autor" });
   grupo.belongsToMany(usuario, { as: 'autor_usuarios', through: noticia, foreignKey: "grupoempresa", otherKey: "autor" });
-  proyecto.belongsToMany(proyecto, { as: 'proyectocodigo_proyectos', through: proyectousuario, foreignKey: "proyectoadministrador", otherKey: "proyectocodigo" });
-  proyecto.belongsToMany(proyecto, { as: 'proyectoadministrador_proyectos', through: proyectousuario, foreignKey: "proyectocodigo", otherKey: "proyectoadministrador" });
-  proyecto.belongsToMany(proyecto, { as: 'codigoproyecto_proyectos', through: tarea, foreignKey: "administradorproyecto", otherKey: "codigoproyecto" });
-  proyecto.belongsToMany(proyecto, { as: 'administradorproyecto_proyectos', through: tarea, foreignKey: "codigoproyecto", otherKey: "administradorproyecto" });
-  rol.belongsToMany(usuario, { as: 'usuario_usuarios', through: rolusuario, foreignKey: "rol", otherKey: "usuario" });
   tarea.belongsToMany(tarea, { as: 'tareacodigo_tareas', through: archivo, foreignKey: "tareaadministradorproyecto", otherKey: "tareacodigo" });
   tarea.belongsToMany(tarea, { as: 'tareaadministradorproyecto_tareas', through: archivo, foreignKey: "tareacodigo", otherKey: "tareaadministradorproyecto" });
   tarea.belongsToMany(tarea, { as: 'tareaadministradorproyecto_tareas', through: archivo, foreignKey: "tareacodigoproyecto", otherKey: "tareaadministradorproyecto" });
@@ -65,16 +35,7 @@ function initModels(sequelize) {
   usuario.belongsToMany(tarea, { as: 'tareaadministradorproyecto_tareas', through: usuariotarea, foreignKey: "atareado", otherKey: "tareaadministradorproyecto" });
   grupo.belongsTo(empresa, { as: "empresa_empresa", foreignKey: "empresa"});
   empresa.hasMany(grupo, { as: "grupos", foreignKey: "empresa"});
-  telefono.belongsTo(empresa, { as: "empresa_empresa", foreignKey: "empresa"});
   empresa.hasMany(telefono, { as: "telefonos", foreignKey: "empresa"});
-  encuestausuario.belongsTo(encuesta, { as: "encuestaautor_encuestum", foreignKey: "encuestaautor"});
-  encuesta.hasMany(encuestausuario, { as: "encuestausuarios", foreignKey: "encuestaautor"});
-  encuestausuario.belongsTo(encuesta, { as: "encuestacodigo_encuestum", foreignKey: "encuestacodigo"});
-  encuesta.hasMany(encuestausuario, { as: "encuestacodigo_encuestausuarios", foreignKey: "encuestacodigo"});
-  pregunta.belongsTo(encuesta, { as: "encuestaautor_encuestum", foreignKey: "encuestaautor"});
-  encuesta.hasMany(pregunta, { as: "pregunta", foreignKey: "encuestaautor"});
-  pregunta.belongsTo(encuesta, { as: "encuestacodigo_encuestum", foreignKey: "encuestacodigo"});
-  encuesta.hasMany(pregunta, { as: "encuestacodigo_pregunta", foreignKey: "encuestacodigo"});
   grupo.belongsTo(grupo, { as: "codigosub_grupo", foreignKey: "codigosub"});
   grupo.hasMany(grupo, { as: "grupos", foreignKey: "codigosub"});
   grupo.belongsTo(grupo, { as: "empresasub_grupo", foreignKey: "empresasub"});
@@ -139,19 +100,9 @@ function initModels(sequelize) {
   return {
     archivo,
     empresa,
-    encuesta,
-    encuestausuario,
     grupo,
-    mensaje,
     noticia,
-    pregunta,
-    proyecto,
-    proyectousuario,
-    rol,
-    rolusuario,
-    sesion,
     tarea,
-    telefono,
     usuario,
     usuariogrupo,
     usuariotarea,

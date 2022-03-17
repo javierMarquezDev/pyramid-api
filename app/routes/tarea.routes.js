@@ -14,6 +14,9 @@ module.exports = app => {
     // Retrieve all tareas from one usuario
     router.get("/:usuario",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {tareas.usuario(req,res)} );
 
+    //Retrieve all tareas from one usuario from one grupo
+    router.get("/grupo/usuario/:usuario/:grupoempresa/:grupocodigo",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {tareas.grupousuario(req,res)} );
+
     // Retrieve one tarea
     router.get("/:grupoempresa/:grupocodigo/:id",  (req,res,next)=>{auth.auth(req,res,next)}, (req,res) => {tareas.findOne(req,res)} );
 

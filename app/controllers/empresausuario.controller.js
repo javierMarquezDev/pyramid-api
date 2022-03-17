@@ -1,9 +1,11 @@
+const myLogger = require("../log/logger");
 const db = require("../models");
 const usuario = require("../models/usuario");
 const Usuarios = db.usuarios;
 const Empresas = db.empresas;
 const Grupos = db.grupos;
 const validation = require("../validation/validation")
+const empresausuarios = db.empresausuarios;
 
 
 //Crear empresausuario
@@ -25,6 +27,7 @@ exports.create = async(req, res) => {
             });
         })
         .catch(err => {
+            myLogger.log(err)
             res.status(500).send({
                 message: "Error asignando el usuario."
             });
@@ -43,6 +46,18 @@ exports.findOne = (req, res) => {
 exports.usuario = (req, res) => {
     const usuario = req.params.usuario;
     empresausuarios.findAll({ where: { usuario: usuario } }).then(data => { res.status(200).json(data) });
+};
+
+// Mostrar empresas segun admin
+exports.empresadmin = (req, res) => {
+    const usuario = req.params.usuario;
+    empresausuarios.findAll({ where: { usuario: usuario, admin: true } }).then(data => { res.status(200).json(data) });
+};
+
+// Mostrar admins según empresa
+exports.adminsempresa = (req, res) => {
+    const empresa = req.params.empresa;
+    empresausuarios.findAll({ where: { empresa: empresa, admin: true } }).then(data => { res.status(200).json(data) });
 };
 
 // Mostrar según empresa
@@ -132,6 +147,12 @@ async function validateEmpresaUsuario(empresausuario) {
                 //Validar si existe la empresa
                 if (await Empresas.findOne({ where: { nif: empresausuario["empresa"] } }) == null)
                     errors[key].none = "La empresa no existe";
+                break;
+
+            case "admin":
+                errors[key].empty = validation.empty(empresausuario[key]);
+                if (!(Boolean(empresausuario[key]) === true || Boolean(empresausuario[key]) === false))
+                    errors[key].format = "No es un tipo válido."
                 break;
             default:
                 delete empresausuario[key];

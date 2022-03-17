@@ -2,7 +2,7 @@ const myLogger = require("../log/logger");
 const db = require("../models");
 const noticia = require("../models/noticia");
 const Noticias = db.noticias;
-
+const Usuarios = db.usuarios;
 const grupos = db.grupos;
 const validation = require("../validation/validation")
 const Op = db.Sequelize.Op;
@@ -45,6 +45,7 @@ exports.findAll = (req, res) => {
 
 // Mostrar según PK
 exports.findOne = async (req, res) => {
+    if(isNaN(req.params.grupocodigo) || isNaN(req.params.codigo)) res.status(404).send({message:"Parámetro no válido."});
     const grupoempresa = req.params.grupoempresa;
     const grupocodigo = req.params.grupocodigo;
     const autor = req.params.autor;
@@ -55,6 +56,7 @@ exports.findOne = async (req, res) => {
 
 // Mostrar según grupo
 exports.grupo = async (req, res) => {
+    if(isNaN(req.params.grupocodigo)) res.status(404).send({message:"Parámetro no válido."});
     try {
     const grupoempresa = req.params.grupoempresa;
     const grupocodigo = req.params.grupocodigo;
@@ -66,6 +68,7 @@ exports.grupo = async (req, res) => {
 
 // Mostrar según autor
 exports.usuario = async (req, res) => {
+    if(isNaN(req.params.grupocodigo)) res.status(404).send({message:"Parámetro no válido."});
     const grupoempresa = req.params.grupoempresa;
     const grupocodigo = req.params.grupocodigo;
     const autor = req.params.autor;
@@ -75,6 +78,7 @@ exports.usuario = async (req, res) => {
 //
 // Modificar
 exports.update = async(req, res) => {
+    if(isNaN(req.params.grupocodigo) || isNaN(req.params.codigo)) res.status(404).send({message:"Parámetro no válido."});
     const grupoempresa = req.params.grupoempresa;
     const grupocodigo = req.params.grupocodigo;
     const autor = req.params.autor;
@@ -116,6 +120,7 @@ exports.update = async(req, res) => {
 
 // ELiminar
 exports.deleteOne = async (req, res) => {
+    if(isNaN(req.params.grupocodigo) || isNaN(req.params.codigo)) res.status(404).send({message:"Parámetro no válido."});
     const grupoempresa = req.params.grupoempresa;
     const grupocodigo = req.params.grupocodigo;
     const autor = req.params.autor;
@@ -166,10 +171,10 @@ async function validateNoticia(noticia) {
                 break; 
 
             case "autor":
-                errors[key].empty = validation.empty(grupo[key]);
+                errors[key].empty = validation.empty(noticia[key]);
 
                 //Validar si existe el autor
-                if (await Usuarios.findByPk(grupo[key]) == null)
+                if (await Usuarios.findByPk(noticia[key]) == null)
                     errors[key].none = "El autor no existe";
                 break;
             case "fechahora":

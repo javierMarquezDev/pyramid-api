@@ -14,18 +14,6 @@ module.exports = function(sequelize, Sequelize) {
             type: Sequelize.STRING(50),
             allowNull: false
         },
-        administrador: {
-            type: Sequelize.STRING(30),
-            allowNull: false,
-            references: {
-                model: 'usuario',
-                key: 'email'
-            }
-        },
-        tipovia: {
-            type: Sequelize.STRING(10),
-            allowNull: false
-        },
         nombrevia: {
             type: Sequelize.STRING(50),
             allowNull: false
@@ -36,6 +24,14 @@ module.exports = function(sequelize, Sequelize) {
         },
         codigopuerta: {
             type: Sequelize.STRING(5),
+            allowNull: true
+        },
+        provincia: {
+            type: Sequelize.STRING(50),
+            allowNull: true
+        },
+        localidad: {
+            type: Sequelize.STRING(50),
             allowNull: true
         }
     }, {

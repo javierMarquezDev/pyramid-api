@@ -32,20 +32,19 @@ app.get("/", (req, res) => {
 
 require("./app/routes/usuario.routes")(app);
 require("./app/routes/empresa.routes")(app);
-require("./app/routes/archivo.routes")(app);
 require("./app/routes/grupo.routes")(app);
 require("./app/routes/noticia.routes")(app);
-require("./app/routes/sesion.routes")(app);
 require("./app/routes/tarea.routes")(app);
 require("./app/routes/usuariogrupo.routes")(app);
 require("./app/routes/usuariotarea.routes")(app);
 require("./app/routes/login.routes")(app);
 require("./app/routes/logout.routes")(app);
+require("./app/routes/empresausuario.routes")(app);
 
 // return jwt
-exports.resJWT = () =>{
-    const payload = {check:true};
-    const token = jwt.sign(payload,key,{expiresIn:1440});
+exports.resJWT = (user) =>{
+    const payload = {usuario:user};
+    const token = jwt.sign(payload,key,{expiresIn:21600});
     return token;
 }
 
@@ -53,7 +52,6 @@ exports.resJWT = () =>{
 exports.verifyJWT = (token,response) =>{
 
     return jwt.verify(token,key,response);
-
 }
 
 // set port, listen for requests
